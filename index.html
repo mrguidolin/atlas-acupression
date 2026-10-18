@@ -1318,6 +1318,19 @@ button.pl-loc:active{transform:scale(.96)}
 /* v31.1 · en-têtes des fiches solidaires de la page : ils défilent avec le contenu */
 .sheet .bar{position:relative;top:auto;background:transparent;border-bottom:0}
 .sheet .wk-head{position:relative;top:auto;background:transparent;border-bottom:0}
+/* v31.3 · parcours plus compact : une ligne de progression, titre du point sur une ligne, barre du bas collée au bord */
+.wk-ctx{display:flex;align-items:center;gap:10px;padding:0 16px 6px}
+.wk-segs{flex:1;order:0;margin:0}
+.wk-row{order:1;flex:none;align-items:center;gap:6px}
+.wk-first{margin-top:0;min-height:28px;padding:0 8px;border-radius:999px;background:color-mix(in srgb,var(--brand) 10%,transparent)}
+.wk-pt{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;margin:4px 0 12px}
+.wk-pt .code{align-self:center}
+.wk-pt h1{font-size:1.625rem;font-weight:700;line-height:1.15;letter-spacing:-.01em}
+.wk-pt .han{font-size:1.125rem;color:var(--muted)}
+.wk-pt .mlink{margin-left:auto;align-self:center;font-size:.875rem}
+.wk-head .bar-t{font-size:1rem}
+.sheet.walk{padding-bottom:0!important}
+.sheet.walk .wk-foot{position:sticky;bottom:0}
 
 </style>
 </head>
@@ -4728,7 +4741,7 @@ function screenProfil(){
   ${PL.man && PL.man.credit ? `<p><b>Illustrations.</b> ${plEsc(PL.man.credit)}</p>` : ""}
   <p><b>Sons.</b> Enregistrements libres de droits, adaptés pour boucler sans coupure. Pluie : <a href="https://freesound.org/people/alex36917/sounds/524605/" target="_blank" rel="noopener">alex36917</a> ; vagues : <a href="https://freesound.org/people/Luftrum/sounds/48412/" target="_blank" rel="noopener">Luftrum</a> (Freesound, licence CC BY) ; oiseaux : kvgarlic ; ruisseau : gluckose (CC0), via l'application Blanket. Forêt, feu de bois, grillons, carillon, tonnerre, chouette et bol chantant : via l'application Moodist (CC0 ou licence Pixabay). Le piano, la nappe et les bruits sont fabriqués par l'app.</p>
  </div></div>
- <p class="fine">Version 31.2.</p>`;
+ <p class="fine">Version 31.3.</p>`;
 }
 
 // ── Premier lancement : choix de la silhouette ───────────────
@@ -4824,11 +4837,12 @@ function pointHTML(p, W){
  const pregBanner = p.preg && S.preg ? `<div class="alert" role="alert">${svgi("warn",18,2)}<span>${p.preg === "ci" ? "À éviter pendant votre grossesse." : "Grossesse : ne pressez pas fort sur cette zone."}</span></div>` : "";
  const precautions = [p.warn, (p.preg === "ci" && !p.warn) ? "À éviter pendant la grossesse." : null].filter(Boolean);
  const head = bar(code(p) + " · " + p.py, `<button class="iconbtn" data-act="fav" data-id="${p.id}" aria-pressed="${fav}" aria-label="${fav ? "Retirer de mes points" : "Garder dans mes points"}">${svgi("star",22,1.8,fav ? "currentColor" : "none")}</button>`);
- return `${W ? `<div class="wk-head">${head}${walkCtx(W)}</div>` : head}
+ const wHead = W ? bar(W.name, `<button class="iconbtn" data-act="fav" data-id="${p.id}" aria-pressed="${fav}" aria-label="${fav ? "Retirer de mes points" : "Garder dans mes points"}">${svgi("star",22,1.8,fav ? "currentColor" : "none")}</button>`) : "";
+ return `${W ? `<div class="wk-head">${wHead}${walkCtx(W)}</div>` : head}
  <article class="detail${W ? " wk-detail" : ""}">
-  <div class="ptop"><span class="code" style="${elVar(p.m)}">${code(p)}</span><button class="mlink" data-mer="${p.m}">${m.name} ${svgi("chev",14,2.2)}</button></div>
+  ${W ? `<div class="wk-pt"><span class="code" style="${elVar(p.m)}">${code(p)}</span><h1>${p.py}</h1><span class="han" lang="zh">${p.hz}</span><button class="mlink" data-mer="${p.m}" aria-label="Méridien : ${m.name}">${m.name} ${svgi("chev",12,2.2)}</button></div>` : `<div class="ptop"><span class="code" style="${elVar(p.m)}">${code(p)}</span><button class="mlink" data-mer="${p.m}">${m.name} ${svgi("chev",14,2.2)}</button></div>
   <div class="ptitle"><h1>${p.py}</h1><span class="han" lang="zh">${p.hz}</span></div>
-  <p class="ptr">${p.tr}</p>
+  <p class="ptr">${p.tr}</p>`}
   ${pregBanner}
   <figure class="card figcard pfig">${F.html}<figcaption class="pl-cap"><b>${F.cap}</b><span>${sidesTxt(p)}</span>${merCap(F.mer)}</figcaption></figure>
   <div class="howto"><h2>Pour le trouver</h2>${repSteps(p.rep)}
@@ -4861,7 +4875,7 @@ const wkName = p => `${code(p)} ${p.py}`;
 function walkCtx(W){
  const N = W.ids.length;
  return `<div class="wk-ctx">
-  <div class="wk-row"><span class="wk-name">${W.name}</span><span class="wk-count">Point ${W.i + 1} sur ${N}</span>${W.i > 0 ? `<button class="wk-first" data-wgo="0" aria-label="Revenir au premier point : ${wkName(BY[W.ids[0]])}"><span class="msi" aria-hidden="true">first_page</span>Début</button>` : ""}</div>
+  <div class="wk-row"><span class="wk-count">Point ${W.i + 1} sur ${N}</span>${W.i > 0 ? `<button class="wk-first" data-wgo="0" aria-label="Revenir au premier point : ${wkName(BY[W.ids[0]])}"><span class="msi" aria-hidden="true">first_page</span>Début</button>` : ""}</div>
   <div class="wk-segs" role="group" aria-label="Points du protocole">${W.ids.map((id, j) => { const q = BY[id];
    return `<button class="wk-seg${j < W.i ? " done" : j === W.i ? " cur" : ""}${ciMark(q) ? " is-ci" : ""}" data-wgo="${j}" aria-label="Point ${j + 1} : ${wkName(q)}${ciMark(q) ? ", à éviter pendant la grossesse" : ""}"${j === W.i ? ' aria-current="step"' : ""}><i></i></button>`; }).join("")}</div>
 
@@ -4893,7 +4907,7 @@ function walkGo(sheet, j, dir){
  sheet.innerHTML = pointHTML(BY[id], W);
  sheet.dataset.point = id; sheet.scrollTop = 0;
  if (!reduceMotion()){ const a = sheet.querySelector(".detail"); a.classList.add(d > 0 ? "wk-in-next" : "wk-in-prev"); a.addEventListener("animationend", () => a.classList.remove("wk-in-next", "wk-in-prev"), {once:true}); }
- const h = sheet.querySelector(".ptitle h1"); if (h){ h.tabIndex = -1; h.focus({preventScroll:true}); }
+ const h = sheet.querySelector(".ptitle h1, .wk-pt h1"); if (h){ h.tabIndex = -1; h.focus({preventScroll:true}); }
 }
 // Balayage horizontal (hors planche et visionneuse) et flèches du clavier.
 function walkBind(el){
