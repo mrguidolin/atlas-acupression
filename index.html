@@ -3673,10 +3673,6 @@ function setupHTML(){
   </div>
   <p class="grp-foot">${o.sides === "seq" ? "Le minuteur compte chaque côté séparément." : "Les deux côtés en même temps, avec les deux mains."}</p>
 
-  <h3 class="grp-t">Points <small class="grp-tn">dans l'ordre classique</small></h3>
-  <div class="grp"><ul class="pt-rows">${rows}</ul></div>
-  <p class="grp-foot">Touchez le cercle pour garder ou sauter un point.</p>
-
   <h3 class="grp-t">Son</h3>
   <div class="grp">
    <div class="grp-row col"><span class="grp-l">Signal entre les points</span>${segc("signal", SIGNALS, o.signal, "Signal entre les points")}</div>
@@ -4658,7 +4654,7 @@ function screenProfil(){
   ${PL.man && PL.man.credit ? `<p><b>Illustrations.</b> ${plEsc(PL.man.credit)}</p>` : ""}
   <p><b>Sons.</b> Enregistrements libres de droits, adaptés pour boucler sans coupure. Pluie : <a href="https://freesound.org/people/alex36917/sounds/524605/" target="_blank" rel="noopener">alex36917</a> ; vagues : <a href="https://freesound.org/people/Luftrum/sounds/48412/" target="_blank" rel="noopener">Luftrum</a> (Freesound, licence CC BY) ; oiseaux : kvgarlic ; ruisseau : gluckose (CC0), via l'application Blanket. Forêt, feu de bois, grillons, carillon, tonnerre, chouette et bol chantant : via l'application Moodist (CC0 ou licence Pixabay). Le piano, la nappe et les bruits sont fabriqués par l'app.</p>
  </div></div>
- <p class="fine">Version 29.2.</p>`;
+ <p class="fine">Version 29.3.</p>`;
 }
 
 // ── Premier lancement : choix de la silhouette ───────────────
