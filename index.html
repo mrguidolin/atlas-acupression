@@ -4424,7 +4424,6 @@ const ACC_META = {
  ],
  reperes: [
   ["cun","straighten","Cun","L'unité qui s'adapte à chaque corps"],
-  ["codes","tag","Codes","Ce que veulent dire GI 4 ou LI4"],
   ["lexique","menu_book","Lexique","Les mots de la médecine chinoise"]
  ]
 };
@@ -4601,7 +4600,7 @@ const LEXIQUE = [
 const CODES = [["P","LU","Poumon"],["GI","LI","Gros Intestin"],["E","ST","Estomac"],["Rt","SP","Rate"],["C","HT","Cœur"],["IG","SI","Intestin Grêle"],["V","BL","Vessie"],["R","KI","Rein"],["MC","PC","Maître du Cœur"],["TR","TE","Triple Réchauffeur"],["VB","GB","Vésicule Biliaire"],["F","LR","Foie"],["VG","GV","Vaisseau Gouverneur"],["VC","CV","Vaisseau Conception"]];
 function screenReperes(){
  return `<header class="appbar"><h1>Repères</h1></header>
- <p class="lead">Pour mesurer sur le corps, lire les codes des points et comprendre les mots de la médecine chinoise.</p>
+ <p class="lead">Pour mesurer sur le corps et comprendre les mots de la médecine chinoise.</p>
  ${accPage("reperes", `
  <h2>Mesurer en cun</h2>
  <p>Le <b>cun</b> est l'unité de mesure de la médecine chinoise. Elle s'adapte à chaque corps : on mesure toujours avec les doigts de la personne qui reçoit le soin, pas avec les siens.</p>
@@ -4612,11 +4611,6 @@ function screenReperes(){
   <figure>${cunFig(4)}<b>3 cun</b><figcaption>4 doigts joints</figcaption></figure>
  </div>
  <p class="small">Doigts serrés, mesurez à la hauteur de l'articulation du milieu des doigts. Sur chaque illustration, une petite règle indique la distance en cun et en doigts.</p>
- <h2>Lire le code d'un point</h2>
- <p>Chaque point a un code : l'abréviation de son méridien, puis son numéro. <b>GI 4</b> veut dire 4<sup>e</sup> point du Gros Intestin. Les numéros suivent le trajet du méridien. Le code international, en anglais, marche aussi dans la recherche : GI 4 = LI4.</p>
- <div class="list-card" style="padding:4px 16px"><table class="tbl tbl-codes"><tbody>
-  ${CODES.map(([f,e,n]) => `<tr><td><span class="code" style="${elVar(e)}">${f}</span></td><td>${n}</td><td>${e}</td></tr>`).join("")}
- </tbody></table></div>
  <h2>Lexique</h2>
  <div class="list-card lex">${LEXIQUE.map(([t,d]) => `<div class="lex-i"><b>${t}</b><p>${d}</p></div>`).join("")}</div>
  `)}`;
@@ -4645,7 +4639,7 @@ function screenProfil(){
   ${PL.man && PL.man.credit ? `<p><b>Illustrations.</b> ${plEsc(PL.man.credit)}</p>` : ""}
   <p><b>Sons.</b> Enregistrements libres de droits, adaptés pour boucler sans coupure. Pluie : <a href="https://freesound.org/people/alex36917/sounds/524605/" target="_blank" rel="noopener">alex36917</a> ; vagues : <a href="https://freesound.org/people/Luftrum/sounds/48412/" target="_blank" rel="noopener">Luftrum</a> (Freesound, licence CC BY) ; oiseaux : kvgarlic ; ruisseau : gluckose (CC0), via l'application Blanket. Forêt, feu de bois, grillons, carillon, tonnerre, chouette et bol chantant : via l'application Moodist (CC0 ou licence Pixabay). Le piano, la nappe et les bruits sont fabriqués par l'app.</p>
  </div></div>
- <p class="fine">Version 30.1.</p>`;
+ <p class="fine">Version 30.2.</p>`;
 }
 
 // ── Premier lancement : choix de la silhouette ───────────────
