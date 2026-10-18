@@ -1108,7 +1108,7 @@ button.pl-loc:active{transform:scale(.96)}
 @keyframes sgBreath{0%{transform:scale(.7);opacity:.16}40%{transform:scale(2);opacity:.34}100%{transform:scale(.7);opacity:.16}}
 /* « Pour le trouver » : 2 lignes, la suite s'ouvre sur la planche */
 .sg-how{flex:none;display:flex;align-items:flex-end;gap:6px;margin-top:10px}
-.sg-how p{flex:1;min-width:0;font-size:.9375rem;line-height:1.42;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sg-how p{flex:1;min-width:0;font-size:.9375rem;line-height:1.42}
 .sg-how p b{color:var(--brand-ink);font-weight:700;margin-right:2px}
 .sg-more{flex:none;display:inline-flex;align-items:center;gap:0;min-height:40px;padding:0 2px 0 8px;margin-bottom:-9px;color:var(--brand-ink);font-weight:600;font-size:.875rem}
 .sg-more .msi{font-size:20px}
@@ -1171,7 +1171,7 @@ button.pl-loc:active{transform:scale(.96)}
  .sg-name h1{font-size:1.2rem}
  .sg-stage{margin-top:6px;border-radius:16px}
  .sg-how{margin-top:6px}
- .sg-how p{font-size:.875rem;-webkit-line-clamp:2}
+ .sg-how p{font-size:.875rem}
  .sg-card{margin-top:8px;padding:10px 14px}
  .sg-sub{display:none}
  .sg-side{margin-top:4px}
@@ -3780,7 +3780,7 @@ function renderPlayer(){
   <div class="sg-name"><span class="code" style="${elVar(p.m)}">${code(p)}</span><h1>${p.py}</h1>
    <p class="sg-meta"><span>Point ${ptIndex(SS.i)} sur ${nPts()}</span><span class="sg-left">${fmtLeft(timeLeft())}</span></p></div>
   <div class="sg-stage"></div>
-  <div class="sg-how"><p><b>Pour le trouver</b> ${p.rep}</p><button class="sg-more" data-s="how" aria-label="Lire toutes les étapes pour trouver le point">Suite${msi("expand_less")}</button></div>
+  <div class="sg-how"><p><b>Pour le trouver</b> ${p.rep}</p></div>
   <section class="sg-card" aria-live="polite">
    <div class="sg-status"></div>
    ${next}
@@ -3793,7 +3793,6 @@ function renderPlayer(){
  </div>`;
  fillSessFig();
  if (nx){ const th = wrap.querySelector(".sg-thumb"); if (th) th.innerHTML = pointFig(np, {ctx:"card", w:44, aspect:1, lr:nx.lr}).html; }
- const how = wrap.querySelector(".sg-how p"); if (how && how.scrollHeight <= how.clientHeight + 2) wrap.querySelector(".sg-more").hidden = true;
  updateStatus(false);
 }
 // Bloc d'état : phase, côté, chrono numérique, +15 s / « Je suis prêt ».
@@ -3822,8 +3821,7 @@ function fillSessFig(){
  const st = SS.steps[SS.i], p = BY[st.id];
  const w = Math.max(120, box.clientWidth), h = Math.max(120, box.clientHeight);
  const F = pointFig(p, {ctx:"sess", w, aspect: Math.max(.45, Math.min(2, w / h)), lr: st.lr, maxH: h});
- box.innerHTML = `${F.html}<span class="sp-cap sg-cap">${F.cap}${F.mer ? `<small><i aria-hidden="true"></i>${F.mer.split(" · ")[0]}</small>` : ""}</span>
-  <div class="sg-steps" hidden><div class="sg-steps-in"><div class="sg-steps-h"><b>Pour le trouver</b><button data-s="how" aria-label="Fermer">${msi("close")}</button></div>${repSteps(p.rep)}</div></div>`;
+ box.innerHTML = `${F.html}<span class="sp-cap sg-cap">${F.cap}${F.mer ? `<small><i aria-hidden="true"></i>${F.mer.split(" · ")[0]}</small>` : ""}</span>`;
 }
 addEventListener("resize", () => { clearTimeout(fillSessFig.t); fillSessFig.t = setTimeout(fillSessFig, 120); });
 // Avancement : chrono, segment courant qui se remplit, temps total restant.
@@ -3865,7 +3863,6 @@ function playAction(t){
   updateStatus(true); const b = SS.el.querySelector(".sg-play"); b && b.focus({preventScroll:true}); return;
  }
  if (a === "mute"){ ambMute(!SND.muted); const m = SS.el.querySelector('[data-s="mute"]'); if (m){ m.innerHTML = msi(SND.muted ? "volume_off" : "volume_up"); m.setAttribute("aria-pressed", SND.muted); m.setAttribute("aria-label", SND.muted ? "Remettre le son" : "Couper le son"); } return; }
- if (a === "how"){ const o = SS.el.querySelector(".sg-steps"); if (o){ o.hidden = !o.hidden; } return; }
  if (a === "plus15"){ SS.len += 15; SS.remaining += 15; if (!SS.paused) SS.end += 15000; updateRing(); return; }
  if (a === "ready") return enterPhase("press");
  if (a === "next") return goStep(SS.i + 1);
@@ -4654,7 +4651,7 @@ function screenProfil(){
   ${PL.man && PL.man.credit ? `<p><b>Illustrations.</b> ${plEsc(PL.man.credit)}</p>` : ""}
   <p><b>Sons.</b> Enregistrements libres de droits, adaptés pour boucler sans coupure. Pluie : <a href="https://freesound.org/people/alex36917/sounds/524605/" target="_blank" rel="noopener">alex36917</a> ; vagues : <a href="https://freesound.org/people/Luftrum/sounds/48412/" target="_blank" rel="noopener">Luftrum</a> (Freesound, licence CC BY) ; oiseaux : kvgarlic ; ruisseau : gluckose (CC0), via l'application Blanket. Forêt, feu de bois, grillons, carillon, tonnerre, chouette et bol chantant : via l'application Moodist (CC0 ou licence Pixabay). Le piano, la nappe et les bruits sont fabriqués par l'app.</p>
  </div></div>
- <p class="fine">Version 29.3.</p>`;
+ <p class="fine">Version 29.4.</p>`;
 }
 
 // ── Premier lancement : choix de la silhouette ───────────────
