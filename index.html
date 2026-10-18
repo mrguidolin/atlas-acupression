@@ -1216,14 +1216,14 @@ button.pl-loc:active{transform:scale(.96)}
 .sg-ic.sg-play{width:44px;height:44px;background:color-mix(in srgb,var(--ink) 8%,var(--card));box-shadow:none}
 .sg-ic.sg-play .msi{font-size:26px}
 .sg-ready,.sg-plus{min-height:36px;padding:0 14px;font-size:.875rem}
-.sg-ready{background:transparent;color:var(--brand-ink);border:1.5px solid color-mix(in srgb,var(--brand) 40%,transparent)}
-:root[data-theme="dark"] .sg-ready{color:var(--brand-ink)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .sg-ready{color:var(--brand-ink)}}
+.sg-ready{background:transparent;color:var(--muted);border:1.5px solid var(--hair)}
+:root[data-theme="dark"] .sg-ready{color:var(--muted)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .sg-ready{color:var(--muted)}}
 .sg-plus{background:transparent;color:var(--muted);border:1.5px solid var(--hair)}
-.sg-bar{position:relative;height:6px;margin-top:14px;border-radius:999px;background:color-mix(in srgb,#D2381F 14%,var(--hair2));overflow:hidden}
-.sg-bar i{position:absolute;inset:0;border-radius:999px;background:#D2381F;transform:scaleX(0);transform-origin:left center;transition:transform .25s linear}
-.is-find .sg-bar i{background:color-mix(in srgb,#D2381F 55%,var(--card))}
-.is-paused .sg-bar i{background:color-mix(in srgb,#D2381F 35%,var(--hair2))}
+.sg-bar{position:relative;height:6px;margin-top:14px;border-radius:999px;background:color-mix(in srgb,var(--brand) 12%,var(--hair2));overflow:hidden}
+.sg-bar i{position:absolute;inset:0;border-radius:999px;background:var(--brand);transform:scaleX(0);transform-origin:left center;transition:transform .25s linear}
+.is-find .sg-bar i{background:color-mix(in srgb,var(--brand) 55%,var(--card))}
+.is-paused .sg-bar i{background:color-mix(in srgb,var(--brand) 35%,var(--hair2))}
 .sg-next{margin-top:14px;padding:0 4px;border-top:0}
 .sg-ctrl{display:none}
 @media (max-height:700px){
@@ -4683,7 +4683,7 @@ function screenProfil(){
   ${PL.man && PL.man.credit ? `<p><b>Illustrations.</b> ${plEsc(PL.man.credit)}</p>` : ""}
   <p><b>Sons.</b> Enregistrements libres de droits, adaptés pour boucler sans coupure. Pluie : <a href="https://freesound.org/people/alex36917/sounds/524605/" target="_blank" rel="noopener">alex36917</a> ; vagues : <a href="https://freesound.org/people/Luftrum/sounds/48412/" target="_blank" rel="noopener">Luftrum</a> (Freesound, licence CC BY) ; oiseaux : kvgarlic ; ruisseau : gluckose (CC0), via l'application Blanket. Forêt, feu de bois, grillons, carillon, tonnerre, chouette et bol chantant : via l'application Moodist (CC0 ou licence Pixabay). Le piano, la nappe et les bruits sont fabriqués par l'app.</p>
  </div></div>
- <p class="fine">Version 29.5.</p>`;
+ <p class="fine">Version 30.</p>`;
 }
 
 // ── Premier lancement : choix de la silhouette ───────────────
