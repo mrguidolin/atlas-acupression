@@ -196,7 +196,7 @@
    }
   },
   "head_top": {
-   "label": "Sommet de la tête (front en bas de l’image)",
+   "label": "Sommet de la tête (front en bas de l'image)",
    "face": "dessus",
    "limb": "tête",
    "m": {
@@ -3061,7 +3061,7 @@
     1949.7
    ],
    "cun": {
-    "text": "0,5 cun",
+    "text": "0,5 cun · ½ pouce",
     "a": [
      926.3,
      2013.2
@@ -3595,7 +3595,7 @@
      ]
     },
     {
-     "label": "articulation MCP 4",
+     "label": "jointure de l'annulaire",
      "m": [
       1296.2,
       1616.4
@@ -3956,7 +3956,7 @@
    ],
    "lm": [
     {
-     "label": "articulations MCP 2-3",
+     "label": "jointures index–majeur",
      "m": [
       1056.9,
       1671.9
@@ -4047,7 +4047,7 @@
      ]
     },
     {
-     "label": "articulations MCP",
+     "label": "jointures",
      "m": [
       1215.0,
       1644.1
@@ -4228,7 +4228,7 @@
      ]
     },
     {
-     "label": "bas de l’aile du nez",
+     "label": "bas de l'aile du nez",
      "m": [
       1153.0,
       1679.2
@@ -4463,7 +4463,7 @@
    },
    "lm": [
     {
-     "label": "coin interne de l’œil",
+     "label": "coin interne de l'œil",
      "m": [
       1197.4,
       1270.8
@@ -4540,7 +4540,7 @@
      ]
     },
     {
-     "label": "coin interne de l’œil",
+     "label": "coin interne de l'œil",
      "m": [
       1197.4,
       1270.8
@@ -4627,7 +4627,7 @@
      ]
     },
     {
-     "label": "lobe de l’oreille",
+     "label": "lobe de l'oreille",
      "m": [
       593.7,
       995.1
@@ -4730,7 +4730,7 @@
      ]
     },
     {
-     "label": "coin externe de l’œil",
+     "label": "coin externe de l'œil",
      "m": [
       1405.1,
       1260.3
@@ -4851,7 +4851,7 @@
    },
    "lm": [
     {
-     "label": "apex de l’oreille",
+     "label": "apex de l'oreille",
      "m": [
       1377.5,
       961.8
@@ -4983,25 +4983,277 @@
    "cun": {
     "text": "ligne entre les sommets des oreilles",
     "a": [
+     92.6,
+     1358.8
+    ],
+    "b": [
      1908.1,
      1356.8
     ],
-    "b": [
-     1000.0,
-     495.9
+    "path": [
+     [
+      92.6,
+      1358.8
+     ],
+     [
+      181.5,
+      1303.7
+     ],
+     [
+      179.3,
+      1247.2
+     ],
+     [
+      184.5,
+      1192.4
+     ],
+     [
+      186.7,
+      1118.2
+     ],
+     [
+      186.1,
+      1028.6
+     ],
+     [
+      199.7,
+      946.0
+     ],
+     [
+      230.1,
+      860.0
+     ],
+     [
+      283.6,
+      767.5
+     ],
+     [
+      359.3,
+      680.2
+     ],
+     [
+      450.4,
+      615.3
+     ],
+     [
+      519.5,
+      583.1
+     ],
+     [
+      632.2,
+      543.9
+     ],
+     [
+      748.6,
+      517.2
+     ],
+     [
+      889.3,
+      499.7
+     ],
+     [
+      1000.0,
+      495.9
+     ],
+     [
+      1110.6,
+      499.9
+     ],
+     [
+      1251.4,
+      517.3
+     ],
+     [
+      1367.8,
+      544.0
+     ],
+     [
+      1480.5,
+      583.1
+     ],
+     [
+      1549.6,
+      615.4
+     ],
+     [
+      1640.8,
+      680.3
+     ],
+     [
+      1716.4,
+      767.6
+     ],
+     [
+      1769.9,
+      860.1
+     ],
+     [
+      1800.3,
+      946.2
+     ],
+     [
+      1813.4,
+      1028.9
+     ],
+     [
+      1812.3,
+      1118.7
+     ],
+     [
+      1815.5,
+      1192.6
+     ],
+     [
+      1820.7,
+      1247.4
+     ],
+     [
+      1818.5,
+      1304.0
+     ],
+     [
+      1908.1,
+      1356.8
+     ]
     ],
     "af": [
+     123.3,
+     1448.5
+    ],
+    "bf": [
      1877.5,
      1446.4
     ],
-    "bf": [
-     1000.0,
-     447.9
+    "pathf": [
+     [
+      123.3,
+      1448.5
+     ],
+     [
+      202.0,
+      1389.8
+     ],
+     [
+      196.0,
+      1328.1
+     ],
+     [
+      191.4,
+      1255.3
+     ],
+     [
+      181.6,
+      1168.1
+     ],
+     [
+      175.5,
+      1105.8
+     ],
+     [
+      181.8,
+      1001.4
+     ],
+     [
+      199.1,
+      923.4
+     ],
+     [
+      250.4,
+      804.4
+     ],
+     [
+      300.9,
+      727.5
+     ],
+     [
+      392.0,
+      630.3
+     ],
+     [
+      490.4,
+      562.9
+     ],
+     [
+      597.3,
+      516.8
+     ],
+     [
+      740.3,
+      476.5
+     ],
+     [
+      859.0,
+      457.1
+     ],
+     [
+      1000.0,
+      447.9
+     ],
+     [
+      1141.0,
+      457.1
+     ],
+     [
+      1259.7,
+      476.5
+     ],
+     [
+      1402.7,
+      516.8
+     ],
+     [
+      1509.5,
+      563.0
+     ],
+     [
+      1608.0,
+      630.4
+     ],
+     [
+      1699.1,
+      727.7
+     ],
+     [
+      1749.6,
+      804.5
+     ],
+     [
+      1800.9,
+      923.6
+     ],
+     [
+      1818.2,
+      1001.6
+     ],
+     [
+      1824.5,
+      1105.9
+     ],
+     [
+      1817.7,
+      1168.4
+     ],
+     [
+      1808.8,
+      1255.5
+     ],
+     [
+      1804.0,
+      1328.4
+     ],
+     [
+      1798.0,
+      1390.1
+     ],
+     [
+      1877.5,
+      1446.4
+     ]
     ]
    },
    "lm": [
     {
-     "label": "avant (front)",
+     "label": "vers le front",
      "m": [
       1000.0,
       1714.5
@@ -5012,7 +5264,7 @@
      ]
     },
     {
-     "label": "arrière (nuque)",
+     "label": "vers la nuque",
      "m": [
       1000.0,
       412.3
@@ -5023,7 +5275,7 @@
      ]
     },
     {
-     "label": "sommet de l’oreille",
+     "label": "sommet de l'oreille",
      "m": [
       1908.1,
       1356.8
@@ -5031,6 +5283,17 @@
      "f": [
       1877.5,
       1446.4
+     ]
+    },
+    {
+     "label": "sommet de l'oreille droite",
+     "m": [
+      92.6,
+      1358.8
+     ],
+     "f": [
+      123.3,
+      1448.5
      ]
     }
    ],
@@ -5043,6 +5306,10 @@
      "m": [
       1000.0,
       146.0
+     ],
+     "f": [
+      1000.0,
+      126.5
      ]
     }
    },
@@ -5055,7 +5322,7 @@
     602.7
    ],
    "cun": {
-    "text": "0,5 cun",
+    "text": "0,5 cun · ½ pouce",
     "a": [
      1000.0,
      667.0
@@ -5245,7 +5512,7 @@
      ]
     },
     {
-     "label": "coin externe de l’œil",
+     "label": "coin externe de l'œil",
      "m": [
       594.6,
       1101.9
@@ -5342,7 +5609,7 @@
     ]
    },
    "cun": {
-    "text": "1 cun",
+    "text": "1 cun · 1 pouce",
     "a": [
      1000.0,
      495.9
@@ -5362,7 +5629,7 @@
    },
    "lm": [
     {
-     "label": "avant (front)",
+     "label": "vers le front",
      "m": [
       1000.0,
       1714.5
@@ -5373,7 +5640,7 @@
      ]
     },
     {
-     "label": "arrière (nuque)",
+     "label": "vers la nuque",
      "m": [
       1000.0,
       412.3
@@ -5389,7 +5656,27 @@
     574.2
    ],
    "also": {
+    "head_left": {
+     "extra": {
+      "m": [
+       [
+        1104.6,
+        157.9
+       ]
+      ],
+      "f": [
+       [
+        1078.5,
+        138.3
+       ]
+      ]
+     }
+    },
     "head_back": {
+     "m": [
+      1000.0,
+      133.1
+     ],
      "extra": {
       "m": [
        [
@@ -5409,6 +5696,14 @@
        [
         1000.0,
         144.5
+       ],
+       [
+        901.7,
+        136.7
+       ],
+       [
+        1098.3,
+        136.7
        ]
       ]
      }
@@ -6634,7 +6929,7 @@
      ]
     },
     {
-     "label": "tendon d’Achille",
+     "label": "tendon d'Achille",
      "m": [
       1518.0,
       2932.6
@@ -6758,7 +7053,7 @@
    ],
    "lm": [
     {
-     "label": "ongle du 5e orteil",
+     "label": "ongle du petit orteil",
      "m": [
       1263.4,
       1784.4
@@ -6884,7 +7179,7 @@
      ]
     },
     {
-     "label": "tendon d’Achille",
+     "label": "tendon d'Achille",
      "m": [
       570.4,
       2763.4
@@ -7043,7 +7338,7 @@
      ]
     },
     {
-     "label": "tendon d’Achille",
+     "label": "tendon d'Achille",
      "m": [
       546.5,
       2522.4
@@ -7108,7 +7403,7 @@
      ]
     },
     {
-     "label": "hiatus sacré",
+     "label": "bas du sacrum",
      "m": [
       1703.7,
       814.8
@@ -7131,26 +7426,18 @@
     970.2,
     1602.3
    ],
-   "cun": {
-    "text": "9 cun",
-    "a": [
-     987.3,
-     2376.4
-    ],
-    "b": [
-     970.2,
-     1602.3
-    ],
-    "af": [
-     956.3,
-     2324.1
-    ],
-    "bf": [
-     971.3,
-     1539.4
-    ]
-   },
    "lm": [
+    {
+     "label": "bout du majeur, bras le long du corps",
+     "m": [
+      970.2,
+      1602.3
+     ],
+     "f": [
+      971.3,
+      1539.4
+     ]
+    },
     {
      "label": "bandelette ilio-tibiale",
      "m": [
@@ -7683,7 +7970,7 @@
    },
    "lm": [
     {
-     "label": "épine de l’omoplate",
+     "label": "épine de l'omoplate",
      "m": [
       596.8,
       1162.1
@@ -7694,7 +7981,7 @@
      ]
     },
     {
-     "label": "pointe de l’omoplate",
+     "label": "pointe de l'omoplate",
      "m": [
       583.7,
       1636.0
@@ -8820,7 +9107,7 @@
     ]
    },
    "cun": {
-    "text": "0,5 cun",
+    "text": "0,5 cun · ½ pouce",
     "a": [
      1000.0,
      862.0
@@ -64432,20 +64719,20 @@
   }
  },
  "meridian_dir": {
-  "LU": "du thorax vers le pouce",
+  "LU": "de la poitrine vers le pouce",
   "LI": "de l'index vers le visage",
   "ST": "du visage vers le 2e orteil",
-  "SP": "du gros orteil vers le thorax",
-  "HT": "de l'aisselle vers l'auriculaire",
-  "SI": "de l'auriculaire vers le visage",
-  "BL": "de l'œil vers le 5e orteil, par le crâne et le dos",
-  "KI": "de la plante du pied vers le thorax",
-  "PC": "du thorax vers le majeur",
+  "SP": "du gros orteil vers la poitrine",
+  "HT": "de l'aisselle vers le petit doigt",
+  "SI": "du petit doigt vers le visage",
+  "BL": "de l'œil vers le petit orteil, par le crâne et le dos",
+  "KI": "de la plante du pied vers la poitrine",
+  "PC": "de la poitrine vers le majeur",
   "TE": "de l'annulaire vers le sourcil",
   "GB": "de l'œil vers le 4e orteil",
-  "LR": "du gros orteil vers le thorax",
-  "GV": "du coccyx vers la lèvre supérieure, par le dos et le crâne",
-  "CV": "du périnée vers le menton"
+  "LR": "du gros orteil vers la poitrine",
+  "GV": "du coccyx vers la gencive du haut, par le dos et le crâne",
+  "CV": "du périnée vers le creux du menton"
  },
  "meridian_note": "Tracé superficiel des 14 méridiens (12 réguliers + VG + VC) selon la séquence OMS 2008 (361 points, points intermédiaires approchés en cun proportionnels), calculé en 3D sur la peau et projeté avec occultation ; chaque polyligne va dans le sens de circulation (premier point -> dernier point). Les portions cachées (derrière le corps ou sous le vêtement) sont omises."
 }
