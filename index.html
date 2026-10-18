@@ -1234,6 +1234,27 @@ button.pl-loc:active{transform:scale(.96)}
 }
 @media (prefers-reduced-motion:reduce){.sg-bar i{transition:none}}
 .sess-wrap.sg .sg-main{padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+/* v30.1 · Pratiquer homogène : listes « facts » et jauge de pression */
+.facts{padding:0}
+.fact{display:flex;gap:14px;padding:14px 16px}
+.fact+.fact{border-top:1px solid var(--hair)}
+.fact b{display:block;font-weight:600;font-size:1rem;line-height:1.3}
+.fact p{margin:3px 0 0;color:var(--muted);font-size:.9375rem;line-height:1.45}
+.fact>div{min-width:0}
+.fact-n{flex:none;width:26px;height:26px;border-radius:999px;display:grid;place-items:center;background:color-mix(in srgb,var(--brand) 12%,var(--card));color:var(--brand-ink);font-weight:700;font-size:.875rem;margin-top:1px}
+.prose .facts,.prose .gauge{margin-top:var(--gap-blk);margin-bottom:var(--gap-blk)}
+.gauge{margin-left:0;margin-right:0;padding:16px;background:var(--card);border-radius:var(--r)}
+.gauge-bar{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px}
+.gauge-bar i{position:relative;height:14px;border-radius:4px;font-style:normal}
+.gauge-bar i span{position:absolute;top:20px;left:0;right:0;text-align:center;font-size:.75rem;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.gauge-bar .glo{background:color-mix(in srgb,var(--brand) 18%,var(--hair2))}
+.gauge-bar .gok{background:var(--brand)}
+.gauge-bar .ghi{background:color-mix(in srgb,var(--point) 55%,var(--card))}
+.gauge-bar i:first-child{border-radius:7px 4px 4px 7px}.gauge-bar i:last-child{border-radius:4px 7px 7px 4px}
+.gauge-l{display:grid;grid-template-columns:3fr 3fr 4fr;gap:4px;margin-top:30px;font-size:.8125rem;font-weight:600;text-align:center}
+.gauge-l .glo{color:var(--muted)}.gauge-l .gok{color:var(--brand-ink)}.gauge-l .ghi{color:var(--point)}
+.acc-body .facts,.prose .facts{margin-left:0!important;margin-right:0!important;border-radius:var(--r);overflow:hidden}
+.kpi b{white-space:nowrap;font-size:1rem}
 
 </style>
 </head>
@@ -4393,18 +4414,16 @@ const MAT = [
 const ACC_META = {
  pratiquer: [
   ["prep","self_improvement","Préparer","Le lieu, la position, les mains"],
-  ["presser","back_hand","Presser","Doigt, force et gestes"],
-  ["materiel","sports_tennis","Matériel","Les mains suffisent, quelques aides"],
+  ["presser","back_hand","Presser","Le doigt, la force, les gestes"],
   ["duree","timer","Durée","Par point et par séance"],
   ["horloge","schedule","Horloge","Les heures de pointe des méridiens"],
-  ["ordre","format_list_numbered","Ordre","De haut en bas, le dos avant le ventre"],
+  ["ordre","format_list_numbered","Ordre","De haut en bas"],
   ["apres","spa","Après","Ce qui est normal, noter l'effet"],
   ["pourquoi","lightbulb","Pourquoi","Tradition et science, côte à côte"],
   ["precautions","warning","Précautions","Quand éviter, quand arrêter"]
  ],
  reperes: [
   ["cun","straighten","Cun","L'unité qui s'adapte à chaque corps"],
-  ["distances","height","Distances","Partager le corps en parts égales"],
   ["codes","tag","Codes","Ce que veulent dire GI 4 ou LI4"],
   ["lexique","menu_book","Lexique","Les mots de la médecine chinoise"]
  ]
@@ -4463,134 +4482,89 @@ function nowMeridian(){
  return CLOCK[Math.floor(((h - 3 + 24) % 24) / 2)];
 }
 const hoursTxt = h => "de " + h.replace(" – ", " à ");
+const facts = (items, num) => `<div class="list-card facts${num ? " num" : ""}">${items.map(([t, d], i) => `<div class="fact">${num ? `<span class="fact-n">${i + 1}</span>` : ""}<div><b>${t}</b><p>${d}</p></div></div>`).join("")}</div>`;
+const gauge = () => `<figure class="gauge" aria-label="Force de pression de 1 à 10 : visez 4 à 6">
+ <div class="gauge-bar">${Array.from({length: 10}, (_, i) => `<i class="g${i < 3 ? "lo" : i < 6 ? "ok" : "hi"}"><span>${i + 1}</span></i>`).join("")}</div>
+ <figcaption class="gauge-l"><span class="glo">Trop léger</span><span class="gok">Idéal</span><span class="ghi">Trop fort</span></figcaption>
+</figure>`;
 function screenPratiquer(){
  const cur = nowMeridian(), cm = MER[cur];
  return `<header class="appbar"><h1>Pratiquer</h1></header>
- <p class="lead">Tout pour réussir une séance : préparer, presser, avec quoi, combien de temps, à quelle heure, et pourquoi ça peut agir.</p>
+ <p class="lead">Tout pour réussir une séance, en quelques repères.</p>
  ${accPage("pratiquer", `
  <h2>Préparer la séance</h2>
- <div class="steps">
-  <div class="step"><span class="sn">1</span><div><b>Un moment calme</b><p>Choisissez un endroit tranquille et chaud. Coupez les notifications. Prenez trois respirations lentes avant de commencer.</p></div></div>
-  <div class="step"><span class="sn">2</span><div><b>Une bonne position</b><p>Installez-vous pour que les muscles soient relâchés. Le tableau ci-dessous vous guide.</p></div></div>
-  <div class="step"><span class="sn">3</span><div><b>Des mains prêtes</b><p>Mains propres et chaudes, ongles courts. Frottez-les si elles sont froides. Pas de crème : le doigt doit tenir sur la peau sans glisser.</p></div></div>
-  <div class="step"><span class="sn">4</span><div><b>Repérer avant de presser</b><p>Ouvrez la fiche du point. Mesurez avec les doigts de la personne qui reçoit le soin. Cherchez du bout du doigt un léger creux, souvent un peu plus sensible.</p></div></div>
- </div>
- <h3>Quelle position pour quelle zone</h3>
- <div class="list-card pos">
-  <div class="pos-i"><b>Tête, visage, mains, pieds</b><span>Assis, le dos bien calé.</span></div>
-  <div class="pos-i"><b>Ventre, devant des jambes</b><span>Allongé sur le dos, un coussin sous les genoux.</span></div>
-  <div class="pos-i"><b>Dos, nuque</b><span>Allongé sur le ventre, ou assis à l'envers sur une chaise, penché en avant.</span></div>
-  <div class="pos-i"><b>Hanche, fesse</b><span>Couché sur le côté, la jambe du dessus pliée.</span></div>
- </div>
- <p class="fine" style="margin-top:10px">Seul, les points du dos sont difficiles à atteindre : utilisez une balle contre un mur, ou faites-vous aider.</p>
+ ${facts([
+  ["Un moment calme", "Un endroit tranquille et chaud, les notifications coupées. Trois respirations lentes pour commencer."],
+  ["Une position détendue", "Assis pour la tête, les mains et les pieds. Allongé pour le ventre et le dos."],
+  ["Des mains prêtes", "Propres et chaudes, ongles courts, sans crème."],
+  ["Repérer avant de presser", "Ouvrez la fiche du point et mesurez avec les doigts de la personne qui reçoit le soin. Le point est souvent un léger creux, un peu sensible."]
+ ], true)}
 
  <h2>Bien presser</h2>
- <ul>
-  <li><b>Avec quoi</b> : la pulpe du pouce ou du majeur, c'est-à-dire le bout charnu, pas l'ongle. Pour plus de force, posez l'index sur le majeur.</li>
-  <li><b>Comment</b> : le doigt bien droit, perpendiculaire à la peau. Appuyez peu à peu, sans à-coup.</li>
-  <li><b>Jusqu'où</b> : jusqu'à une sensation « juste » : lourdeur, chaleur, léger engourdissement, ou sensation qui se diffuse autour. La tradition l'appelle le <b>De Qi</b>. Jamais de douleur vive.</li>
- </ul>
- <div class="scale" role="img" aria-label="Échelle de pression de 0 à 10 : visez 4 à 6">
-  <div class="sc sc-lo"><b>1 – 3</b><span>Trop léger</span></div>
-  <div class="sc sc-ok"><b>4 – 6</b><span>La bonne zone</span></div>
-  <div class="sc sc-hi"><b>7 – 10</b><span>Trop fort</span></div>
- </div>
- <p class="small" style="margin-top:8px">Sur une échelle de 0 à 10, visez 4 à 6 : une pression nette, parfois un peu désagréable, mais que l'on supporte sans se crisper ni bloquer son souffle.</p>
- <ul>
-  <li><b>Respirer</b> : appuyez en soufflant, relâchez un peu en inspirant. C'est la règle du shiatsu. Elle aide à se détendre.</li>
- </ul>
- <h3>Trois gestes</h3>
- <ul>
-  <li><b>Pression fixe</b> : vous appuyez et vous tenez. C'est le geste de base.</li>
-  <li><b>Petits cercles</b> : le doigt reste sur le point et fait bouger la peau en rond, sans frotter.</li>
-  <li><b>Pressions rythmées</b> : vous appuyez, puis relâchez, environ une fois par seconde.</li>
- </ul>
- <h3>Renforcer ou dégager</h3>
- <ul>
-  <li><b>Renforcer</b> ce qui manque, par exemple en cas de fatigue : pression douce et longue, cercles lents. La tradition dit « tonifier ».</li>
-  <li><b>Dégager</b> ce qui bloque, par exemple une tension ou une douleur vive : pression plus ferme et plus courte, gestes plus rapides. La tradition dit « disperser ».</li>
-  <li><b>Le sens des cercles</b> (comme les aiguilles d'une montre ou non) varie selon les écoles. Il n'y a pas de règle unique.</li>
-  <li><b>En shiatsu</b>, on presse avec le poids du corps, bras tendus, plutôt qu'avec la force des muscles. L'autre main reste posée sur le corps.</li>
- </ul>
-
- <h2>Le matériel</h2>
- <p>Vos mains suffisent. Quelques objets simples aident pour certains points.</p>
- <div class="list-card mats">${MAT.map(([ic,t,d]) => `<div class="mat"><span class="mat-ic"><span class="msi" aria-hidden="true">${ic}</span></span><div><b>${t}</b><p>${d}</p></div></div>`).join("")}</div>
- <p class="small" style="margin-top:12px"><b>À éviter</b> : l'huile ou la crème (le doigt glisse) et les objets pointus. D'autres outils de la médecine chinoise demandent une formation et ne font pas partie de l'acupression : les aiguilles (acupuncture), les ventouses et le gua sha, qui consiste à gratter la peau avec un outil lisse.</p>
+ ${facts([
+  ["Avec le bout du doigt", "La pulpe du pouce ou du majeur, jamais l'ongle. Le doigt droit, perpendiculaire à la peau."],
+  ["Peu à peu", "Appuyez progressivement, sans à-coup, en soufflant. Relâchez un peu en inspirant."],
+  ["Jusqu'à la sensation juste", "Lourdeur, chaleur ou léger engourdissement : la tradition l'appelle le De Qi. Jamais de douleur vive."]
+ ])}
+ ${gauge()}
+ <h3>Les gestes</h3>
+ ${facts([
+  ["Pression fixe", "Vous appuyez et vous tenez. C'est le geste de base."],
+  ["Petits cercles", "Le doigt reste sur le point et fait bouger la peau en rond, sans frotter."],
+  ["Renforcer ou dégager", "Doux et long pour la fatigue. Plus ferme et plus court pour une tension ou une douleur."]
+ ])}
 
  <h2>Combien de temps</h2>
  <div class="kpis">
   <div class="kpi"><b>30 s – 2 min</b><span>par point</span></div>
-  <div class="kpi"><b>3 – 6</b><span>points par séance</span></div>
+  <div class="kpi"><b>3 – 6</b><span>points</span></div>
   <div class="kpi"><b>5 – 15 min</b><span>par séance</span></div>
  </div>
- <ul>
-  <li><b>Gêne passagère</b> (mal de tête, nausée, tension) : à la demande. Vous pouvez recommencer quelques heures plus tard.</li>
-  <li><b>Trouble qui dure</b> (sommeil, digestion, fatigue) : une ou deux séances par jour, pendant une à trois semaines. Puis faites le point.</li>
-  <li><b>Le bon moment</b> : le soir pour le sommeil, le matin pour l'énergie. Pour la digestion, attendez au moins une heure après le repas.</li>
- </ul>
- <p class="fine" style="margin-top:0">Ce sont des repères pratiques courants, pas des règles strictes. Suivez les sensations de la personne.</p>
+ ${facts([
+  ["Gêne passagère", "Mal de tête, nausée, tension : à la demande, et à nouveau quelques heures plus tard si besoin."],
+  ["Trouble qui dure", "Sommeil, digestion, fatigue : une ou deux séances par jour pendant une à trois semaines."],
+  ["Le bon moment", "Le soir pour dormir, le matin pour l'énergie, au moins une heure après un repas."]
+ ])}
 
  <h2>L'horloge des méridiens</h2>
- <p>Selon la tradition chinoise, l'énergie fait le tour des douze méridiens en 24 heures. Elle passe deux heures dans chacun : c'est son heure de pointe. Douze heures plus tard, elle y est au plus bas.</p>
+ <p>Selon la tradition, l'énergie passe deux heures dans chaque méridien : c'est son heure de pointe.</p>
  <div class="card clock" style="${elVar(cur)}">${dial(cur)}<div><small class="clock-k">En ce moment</small><h3>${cm.name}</h3><p>${hoursTxt(cm.h)[0].toUpperCase() + hoursTxt(cm.h).slice(1)}, selon l'heure de votre téléphone.</p></div></div>
  <div class="list-card hours"><ul class="rows">${CLOCK.map(k => { const m = MER[k]; const on = k === cur; return `<li><button class="lrow${on ? " is-now" : ""}" data-mer="${k}" style="${elVar(k)}"><span class="glyph">${m.fr}</span><span><b>${m.name}</b><small>${m.h}</small></span><span class="cnt">${on ? '<span class="badge badge-now">Maintenant</span>' : ""}${CHEV}</span></button></li>`; }).join("")}</ul></div>
- ${TRAD(`<p><b>Repérer un rythme</b> : un trouble qui revient chaque jour à la même heure peut orienter vers un méridien. Exemple classique : se réveiller toutes les nuits entre 1 h et 3 h, l'heure du Foie.</p>
-  <p><b>Choisir l'heure de la séance</b> : certaines écoles dégagent un méridien pendant ses deux heures de pointe, et le renforcent dans les deux heures qui suivent.</p>
-  <p><b>Les opposés</b> : chaque méridien a son opposé, douze heures plus loin sur le cadran. Par exemple le Poumon (3 h à 5 h) et la Vessie (15 h à 17 h). Quand l'un est au plus haut, l'autre est au plus bas.</p>
-  <p class="small">Ces heures sont des heures solaires : midi, c'est quand le soleil est au plus haut. En Suisse, elles tombent environ une demi-heure plus tard que l'heure de la montre en hiver, et environ une heure et demie plus tard en été.</p>`)}
- ${SCI(`<p><b>Les horloges du corps existent.</b> Chaque organe a sa propre horloge interne, réglée sur environ 24 heures. La découverte de leur mécanisme a reçu le prix Nobel de médecine en 2017.</p>
-  <p><b>Certains troubles ont leur heure.</b> L'asthme s'aggrave souvent la nuit, vers 4 h. Le cortisol, une hormone du stress, est au plus haut le matin, peu après le réveil.</p>
-  <p><b>Mais le découpage chinois n'est pas prouvé.</b> Aucune étude n'a confirmé les douze créneaux de deux heures. Que l'asthme de nuit tombe dans le créneau du Poumon est une coïncidence intéressante, pas une preuve.</p>`)}
+ ${TRAD(`<p><b>Un trouble qui revient chaque jour à la même heure</b> peut orienter vers un méridien. Par exemple, se réveiller entre 1 h et 3 h, l'heure du Foie.</p>
+  <p class="small">Ce sont des heures solaires : en Suisse, environ une demi-heure plus tard que la montre en hiver, une heure et demie en été.</p>`)}
+ ${SCI(`<p><b>Le corps a bien ses horloges.</b> Chaque organe suit un rythme d'environ 24 heures (prix Nobel de médecine 2017). L'asthme s'aggrave souvent la nuit, le cortisol est au plus haut le matin.</p>`)}
 
  <h2>Dans quel ordre</h2>
- <p>Les textes classiques donnent une règle simple, reprise dans l'enseignement chinois actuel. Les séances de l'atlas la suivent.</p>
- <ul>
-  <li><b>De haut en bas</b> : la tête et la nuque d'abord, puis le tronc, puis les bras, et les jambes et les pieds en dernier. Sun Simiao l'écrivait déjà au 7<sup>e</sup> siècle : « commencer par le haut, finir par le bas ».</li>
-  <li><b>Le dos avant le ventre</b> : quand une séance a des points des deux côtés du tronc, on commence par le dos.</li>
-  <li><b>Un membre à la fois</b> : sur un bras ou une jambe, on descend de point en point, sans revenir en arrière.</li>
-  <li><b>Les deux côtés</b> : pressez le point à gauche, puis à droite, avant de passer au suivant. Vous pouvez aussi presser les deux côtés en même temps.</li>
-  <li><b>Les paires restent ensemble</b> : certains points vont par deux et se suivent. Par exemple MC 6 puis Rt 4, IG 3 puis V 62, P 7 puis R 6, TR 5 puis VB 41.</li>
- </ul>
- <p><b>Deux exceptions voulues</b></p>
- <ul>
-  <li><b>Douleur aiguë ou blocage</b> (torticolis, lumbago, mal de dents, crampe, douleur d'estomac ou de règles) : commencez par les points éloignés de la douleur, en bougeant doucement la zone si c'est possible. Finissez par les points proches. C'est la pratique courante des acupuncteurs.</li>
-  <li><b>« Se recentrer »</b> : cette séance part des pieds et remonte vers la tête, comme on prend conscience de son corps en partant du sol.</li>
- </ul>
- <p class="small">Ces règles sont des habitudes de la tradition. Aucune étude n'a comparé un ordre à un autre.</p>
- <p>Dans chaque situation de l'onglet Symptômes, « Séance guidée » vous accompagne point par point, avec un minuteur. Avant de commencer, vous choisissez la durée par point, l'ordre, les points à garder et une ambiance sonore.</p>
+ ${facts([
+  ["De haut en bas", "La tête d'abord, puis le tronc, les bras, et les jambes en dernier."],
+  ["Le dos avant le ventre", "Quand la séance a des points des deux côtés du tronc."],
+  ["Gauche, puis droite", "Pour chaque point, avant de passer au suivant."],
+  ["Douleur aiguë", "Exception : commencez par les points éloignés de la douleur, puis finissez par les points proches."]
+ ])}
+ <p class="small">Les séances guidées suivent déjà cet ordre.</p>
 
  <h2>Après la séance</h2>
- <ul>
-  <li><b>Prenez votre temps</b> : restez assis ou allongé une minute avant de vous lever. Quand on est très détendu, la tête peut tourner un peu.</li>
-  <li><b>Ce qui est normal</b> : une sensibilité sur le point pendant quelques heures, une détente, parfois un peu de fatigue. Un petit bleu peut apparaître si vous avez pressé fort.</li>
-  <li><b>Un verre d'eau</b> si vous en avez envie. C'est une habitude courante, sans effet prouvé.</li>
-  <li><b>Notez l'effet</b> : avant et après la séance, notez la gêne de 0 à 10. Au bout d'une semaine, vous saurez ce qui vous aide.</li>
-  <li><b>Pas d'effet</b> après deux ou trois semaines : changez de points, ou demandez conseil à un praticien formé.</li>
- </ul>
+ ${facts([
+  ["Prenez votre temps", "Restez assis une minute avant de vous lever."],
+  ["Ce qui est normal", "Une sensibilité sur le point quelques heures, une détente, parfois un peu de fatigue."],
+  ["Notez l'effet", "La gêne de 0 à 10, avant et après. En une semaine, vous saurez ce qui vous aide."],
+  ["Pas d'effet", "Après deux ou trois semaines, changez de points ou demandez conseil à un praticien."]
+ ])}
 
  <h2>Pourquoi ça agit</h2>
- <p>Il existe deux niveaux d'explication. Ils ne disent pas la même chose et n'ont pas la même valeur.</p>
- ${TRAD(`<p>Selon la tradition, le corps est parcouru par le <b>Qi</b>, une énergie vitale. Elle circule dans douze méridiens principaux. Chaque méridien relie un organe à la surface du corps.</p>
-  <p>Un point est un endroit où cette énergie passe près de la surface. En le pressant, on la débloque quand elle stagne, ou on la renforce quand elle manque.</p>
-  <p><b>Pourquoi un point agit loin de l'endroit pressé</b> : le méridien relie ce point à d'autres régions. GI 4, sur la main, soulage le visage parce que le méridien du Gros Intestin monte jusqu'au nez.</p>
-  <p><b>Pourquoi un point agit sur les émotions</b> : pour la tradition, chaque organe a aussi un rôle psychique. Le Foie est lié à la colère, le Cœur au calme et au sommeil, la Rate aux ruminations, le Poumon à la tristesse, le Rein à la peur.</p>
-  <p class="small">C'est un modèle d'explication traditionnel, cohérent et utile en pratique. Ce n'est pas une anatomie prouvée : on n'a trouvé dans le corps aucune structure qui corresponde aux méridiens.</p>`)}
- ${SCI(`<p><b>La pression agit sur les nerfs.</b> Appuyer stimule des capteurs dans la peau et les muscles. Ces messages peuvent freiner le passage des signaux de douleur dans la moelle épinière. C'est la théorie du « portillon » de la douleur.</p>
-  <p><b>Le corps libère ses propres antidouleurs.</b> Des études, surtout sur l'acupuncture, montrent la libération d'endorphines et d'autres substances qui diminuent la douleur.</p>
-  <p><b>Le corps se détend.</b> Respirer lentement, être attentif à son corps et être touché calment le système nerveux : le cœur ralentit, le stress baisse.</p>
-  <p><b>Les effets à distance</b> s'expliquent en partie par la façon dont les nerfs et le cerveau organisent les sensations. Mais la plupart restent mal compris.</p>
-  <p><b>Ce qui reste incertain.</b> Les attentes et le contexte jouent beaucoup : c'est l'effet placebo. Quand des études comparent de vrais points à de faux points, la différence est souvent faible. La preuve la plus solide concerne MC 6 contre les nausées après une opération. Pour la plupart des autres usages, les preuves sont faibles ou contradictoires.</p>`)}
+ ${TRAD(`<p>Le corps est parcouru par le <b>Qi</b>, une énergie vitale qui circule dans les méridiens. Presser un point la débloque ou la renforce.</p>
+  <p>Un point peut agir loin de l'endroit pressé, parce que son méridien relie plusieurs régions : GI 4, sur la main, soulage le visage.</p>`)}
+ ${SCI(`<p><b>La pression agit sur les nerfs</b> et peut freiner les signaux de douleur. Le corps libère aussi ses propres antidouleurs, et se détend : le cœur ralentit, le stress baisse.</p>
+  <p><b>Ce qui reste incertain :</b> l'effet placebo joue beaucoup. La preuve la plus solide concerne MC 6 contre les nausées.</p>`)}
 
  <h2>Précautions</h2>
- <ul>
-  <li>Ne pressez pas sur une peau abîmée, une brûlure, une cicatrice récente, des varices, une fracture ou une entorse récente, ni sur une grosseur dont on ne connaît pas la cause.</li>
-  <li>Évitez juste après un gros repas, quand vous avez très faim, après avoir bu de l'alcool ou en cas de grande fatigue.</li>
-  <li>Si vous prenez un médicament qui fluidifie le sang (anticoagulant), pressez doucement : les bleus viennent vite.</li>
-  <li>Avec les enfants et les personnes âgées, pressez plus doucement et moins longtemps.</li>
-  <li>Pendant la grossesse, plusieurs points sont à éviter. Activez le mode grossesse dans Profil : ils seront signalés partout.</li>
-  <li>Arrêtez si la pression provoque une douleur vive, des fourmillements qui durent ou un malaise. Si la personne pâlit, transpire ou a la tête qui tourne, allongez-la et surélevez ses jambes.</li>
- </ul>
+ ${facts([
+  ["Où ne pas presser", "Peau abîmée, brûlure, cicatrice récente, varices, fracture ou grosseur inconnue."],
+  ["Quand éviter", "Juste après un gros repas, à jeun, après de l'alcool ou en cas de grande fatigue."],
+  ["Plus doucement", "Avec un anticoagulant, chez l'enfant et la personne âgée."],
+  ["Grossesse", "Plusieurs points sont à éviter. Activez le mode grossesse dans Profil."],
+  ["Quand arrêter", "Douleur vive, fourmillements qui durent ou malaise. Si la personne pâlit, allongez-la, jambes surélevées."]
+ ])}
  `, {horloge: "En ce moment : " + cm.name})}`;
 }
 
@@ -4637,19 +4611,7 @@ function screenReperes(){
   <figure>${cunFig(3)}<b>2 cun</b><figcaption>3 doigts joints</figcaption></figure>
   <figure>${cunFig(4)}<b>3 cun</b><figcaption>4 doigts joints</figcaption></figure>
  </div>
- <p class="small">Doigts serrés, mesurez à la hauteur de l'articulation du milieu des doigts. Pour le pouce, mesurez à sa partie la plus large. Sur les schémas des points, une petite règle indique la distance en cun et en doigts.</p>
- <h2>Distances de référence</h2>
- <p>Pour les grandes distances, on partage une partie du corps en parts égales. Exemple : du pli du coude au pli du poignet, il y a 12 cun. Le milieu est donc à 6 cun de chaque pli.</p>
- <div class="list-card" style="padding:4px 16px"><table class="tbl"><tbody>
-  <tr><td>Pli du coude → pli du poignet</td><td>12 cun</td></tr>
-  <tr><td>Pli derrière le genou → bosse extérieure de la cheville</td><td>16 cun</td></tr>
-  <tr><td>Sous le genou, côté intérieur → bosse intérieure de la cheville</td><td>13 cun</td></tr>
-  <tr><td>Bas du sternum → nombril</td><td>8 cun</td></tr>
-  <tr><td>Nombril → haut de l'os du pubis</td><td>5 cun</td></tr>
-  <tr><td>D'un mamelon à l'autre</td><td>8 cun</td></tr>
-  <tr><td>Bord intérieur de l'omoplate → milieu de la colonne</td><td>3 cun</td></tr>
-  <tr><td>Naissance des cheveux, du front à la nuque</td><td>12 cun</td></tr>
- </tbody></table></div>
+ <p class="small">Doigts serrés, mesurez à la hauteur de l'articulation du milieu des doigts. Sur chaque illustration, une petite règle indique la distance en cun et en doigts.</p>
  <h2>Lire le code d'un point</h2>
  <p>Chaque point a un code : l'abréviation de son méridien, puis son numéro. <b>GI 4</b> veut dire 4<sup>e</sup> point du Gros Intestin. Les numéros suivent le trajet du méridien. Le code international, en anglais, marche aussi dans la recherche : GI 4 = LI4.</p>
  <div class="list-card" style="padding:4px 16px"><table class="tbl tbl-codes"><tbody>
@@ -4683,7 +4645,7 @@ function screenProfil(){
   ${PL.man && PL.man.credit ? `<p><b>Illustrations.</b> ${plEsc(PL.man.credit)}</p>` : ""}
   <p><b>Sons.</b> Enregistrements libres de droits, adaptés pour boucler sans coupure. Pluie : <a href="https://freesound.org/people/alex36917/sounds/524605/" target="_blank" rel="noopener">alex36917</a> ; vagues : <a href="https://freesound.org/people/Luftrum/sounds/48412/" target="_blank" rel="noopener">Luftrum</a> (Freesound, licence CC BY) ; oiseaux : kvgarlic ; ruisseau : gluckose (CC0), via l'application Blanket. Forêt, feu de bois, grillons, carillon, tonnerre, chouette et bol chantant : via l'application Moodist (CC0 ou licence Pixabay). Le piano, la nappe et les bruits sont fabriqués par l'app.</p>
  </div></div>
- <p class="fine">Version 30.</p>`;
+ <p class="fine">Version 30.1.</p>`;
 }
 
 // ── Premier lancement : choix de la silhouette ───────────────
