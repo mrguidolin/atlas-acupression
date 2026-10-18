@@ -1,0 +1,434 @@
+{
+"m_face.webp": [
+1000,
+1150
+],
+"m_face_rep.webp": [
+1000,
+1150
+],
+"f_face.webp": [
+1000,
+1150
+],
+"f_face_rep.webp": [
+1000,
+1150
+],
+"m_head_left.webp": [
+1000,
+1050
+],
+"m_head_left_rep.webp": [
+1000,
+1050
+],
+"f_head_left.webp": [
+1000,
+1050
+],
+"f_head_left_rep.webp": [
+1000,
+1050
+],
+"m_head_back.webp": [
+1000,
+1050
+],
+"m_head_back_rep.webp": [
+1000,
+1050
+],
+"f_head_back.webp": [
+1000,
+1050
+],
+"f_head_back_rep.webp": [
+1000,
+1050
+],
+"m_head_top.webp": [
+1000,
+1050
+],
+"m_head_top_rep.webp": [
+1000,
+1050
+],
+"f_head_top.webp": [
+1000,
+1050
+],
+"f_head_top_rep.webp": [
+1000,
+1050
+],
+"m_torso_front.webp": [
+1000,
+1250
+],
+"m_torso_front_rep.webp": [
+1000,
+1250
+],
+"f_torso_front.webp": [
+1000,
+1250
+],
+"f_torso_front_rep.webp": [
+1000,
+1250
+],
+"m_torso_left.webp": [
+1000,
+1250
+],
+"m_torso_left_rep.webp": [
+1000,
+1250
+],
+"f_torso_left.webp": [
+1000,
+1250
+],
+"f_torso_left_rep.webp": [
+1000,
+1250
+],
+"m_back_upper.webp": [
+1000,
+1000
+],
+"m_back_upper_rep.webp": [
+1000,
+1000
+],
+"f_back_upper.webp": [
+1000,
+1000
+],
+"f_back_upper_rep.webp": [
+1000,
+1000
+],
+"m_back_lower.webp": [
+1000,
+1050
+],
+"m_back_lower_rep.webp": [
+1000,
+1050
+],
+"f_back_lower.webp": [
+1000,
+1050
+],
+"f_back_lower_rep.webp": [
+1000,
+1050
+],
+"m_shoulder_left.webp": [
+1000,
+1250
+],
+"m_shoulder_left_rep.webp": [
+1000,
+1250
+],
+"f_shoulder_left.webp": [
+1000,
+1250
+],
+"f_shoulder_left_rep.webp": [
+1000,
+1250
+],
+"m_forearm_palmar.webp": [
+1000,
+1600
+],
+"m_forearm_palmar_rep.webp": [
+1000,
+1600
+],
+"f_forearm_palmar.webp": [
+1000,
+1600
+],
+"f_forearm_palmar_rep.webp": [
+1000,
+1600
+],
+"m_forearm_dorsal.webp": [
+1000,
+1600
+],
+"m_forearm_dorsal_rep.webp": [
+1000,
+1600
+],
+"f_forearm_dorsal.webp": [
+1000,
+1600
+],
+"f_forearm_dorsal_rep.webp": [
+1000,
+1600
+],
+"m_forearm_radial.webp": [
+1000,
+1700
+],
+"m_forearm_radial_rep.webp": [
+1000,
+1700
+],
+"f_forearm_radial.webp": [
+1000,
+1700
+],
+"f_forearm_radial_rep.webp": [
+1000,
+1700
+],
+"m_hand_palmar.webp": [
+1000,
+1200
+],
+"m_hand_palmar_rep.webp": [
+1000,
+1200
+],
+"f_hand_palmar.webp": [
+1000,
+1200
+],
+"f_hand_palmar_rep.webp": [
+1000,
+1200
+],
+"m_hand_dorsal.webp": [
+1000,
+1200
+],
+"m_hand_dorsal_rep.webp": [
+1000,
+1200
+],
+"f_hand_dorsal.webp": [
+1000,
+1200
+],
+"f_hand_dorsal_rep.webp": [
+1000,
+1200
+],
+"m_hand_ulnar.webp": [
+1000,
+1200
+],
+"m_hand_ulnar_rep.webp": [
+1000,
+1200
+],
+"f_hand_ulnar.webp": [
+1000,
+1200
+],
+"f_hand_ulnar_rep.webp": [
+1000,
+1200
+],
+"m_thigh_left.webp": [
+1000,
+1500
+],
+"m_thigh_left_rep.webp": [
+1000,
+1500
+],
+"f_thigh_left.webp": [
+1000,
+1500
+],
+"f_thigh_left_rep.webp": [
+1000,
+1500
+],
+"m_hip_left.webp": [
+1000,
+1000
+],
+"m_hip_left_rep.webp": [
+1000,
+1000
+],
+"f_hip_left.webp": [
+1000,
+1000
+],
+"f_hip_left_rep.webp": [
+1000,
+1000
+],
+"m_leg_front.webp": [
+1000,
+1700
+],
+"m_leg_front_rep.webp": [
+1000,
+1700
+],
+"f_leg_front.webp": [
+1000,
+1700
+],
+"f_leg_front_rep.webp": [
+1000,
+1700
+],
+"m_leg_lateral.webp": [
+1000,
+1700
+],
+"m_leg_lateral_rep.webp": [
+1000,
+1700
+],
+"f_leg_lateral.webp": [
+1000,
+1700
+],
+"f_leg_lateral_rep.webp": [
+1000,
+1700
+],
+"m_leg_medial.webp": [
+1000,
+1700
+],
+"m_leg_medial_rep.webp": [
+1000,
+1700
+],
+"f_leg_medial.webp": [
+1000,
+1700
+],
+"f_leg_medial_rep.webp": [
+1000,
+1700
+],
+"m_leg_back.webp": [
+1000,
+1700
+],
+"m_leg_back_rep.webp": [
+1000,
+1700
+],
+"f_leg_back.webp": [
+1000,
+1700
+],
+"f_leg_back_rep.webp": [
+1000,
+1700
+],
+"m_foot_dorsal.webp": [
+1000,
+1050
+],
+"m_foot_dorsal_rep.webp": [
+1000,
+1050
+],
+"f_foot_dorsal.webp": [
+1000,
+1050
+],
+"f_foot_dorsal_rep.webp": [
+1000,
+1050
+],
+"m_foot_medial.webp": [
+1000,
+850
+],
+"m_foot_medial_rep.webp": [
+1000,
+850
+],
+"f_foot_medial.webp": [
+1000,
+850
+],
+"f_foot_medial_rep.webp": [
+1000,
+850
+],
+"m_foot_sole.webp": [
+1000,
+1150
+],
+"m_foot_sole_rep.webp": [
+1000,
+1150
+],
+"f_foot_sole.webp": [
+1000,
+1150
+],
+"f_foot_sole_rep.webp": [
+1000,
+1150
+],
+"m_full_front.webp": [
+1000,
+1900
+],
+"m_full_front_rep.webp": [
+1000,
+1900
+],
+"f_full_front.webp": [
+1000,
+1900
+],
+"f_full_front_rep.webp": [
+1000,
+1900
+],
+"m_full_back.webp": [
+1000,
+1900
+],
+"m_full_back_rep.webp": [
+1000,
+1900
+],
+"f_full_back.webp": [
+1000,
+1900
+],
+"f_full_back_rep.webp": [
+1000,
+1900
+],
+"m_full_side.webp": [
+1000,
+1900
+],
+"m_full_side_rep.webp": [
+1000,
+1900
+],
+"f_full_side.webp": [
+1000,
+1900
+],
+"f_full_side_rep.webp": [
+1000,
+1900
+]
+}
