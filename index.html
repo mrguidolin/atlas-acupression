@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1331,6 +1331,12 @@ button.pl-loc:active{transform:scale(.96)}
 .wk-head .bar-t{font-size:1rem}
 .sheet.walk{padding-bottom:0!important}
 .sheet.walk .wk-foot{position:sticky;bottom:0}
+/* v33.1 · pas de zoom par double-touche ; bouton rond pour fermer la vue « sur le corps » */
+html{touch-action:manipulation}
+.body-x-wrap{position:sticky;top:0;height:0;z-index:20;pointer-events:none}
+.body-x{pointer-events:auto;position:absolute;top:10px;right:max(12px,env(safe-area-inset-right,0px));width:44px;height:44px;border-radius:999px;display:grid;place-items:center;color:var(--ink);background:color-mix(in srgb,var(--card) 62%,transparent);-webkit-backdrop-filter:blur(12px) saturate(1.3);backdrop-filter:blur(12px) saturate(1.3);box-shadow:0 2px 10px rgb(0 0 0 / .14);border:1px solid color-mix(in srgb,var(--ink) 10%,transparent)}
+.body-x .msi{font-size:24px}
+.body-x:active{transform:scale(.94)}
 
 </style>
 </head>
@@ -3419,12 +3425,16 @@ function zvMove(e){
 }
 function zvUp(e){ if (!ZV) return; ZV.ptrs.delete(e.pointerId); zvStart(); }
 // Pincer une planche ouvre la loupe au lieu du zoom de Safari.
+// Le zoom de Safari est bloqué partout : il pouvait rester coincé et cacher les menus.
+// Pincer une planche ouvre la loupe ; ailleurs, le geste ne fait rien.
 document.addEventListener("gesturestart", e => {
+ e.preventDefault();
  const t = e.target && e.target.closest ? e.target.closest(".plate") : null;
- if (!t) return; e.preventDefault();
- if (!t.classList.contains("zv-stage")) plZoom(t);
+ if (t && !t.classList.contains("zv-stage")) plZoom(t);
 }, {passive:false});
-document.addEventListener("touchmove", e => { if (e.touches && e.touches.length > 1 && e.target.closest && e.target.closest(".plate")) e.preventDefault(); }, {passive:false});
+document.addEventListener("gesturechange", e => e.preventDefault(), {passive:false});
+document.addEventListener("gestureend", e => e.preventDefault(), {passive:false});
+document.addEventListener("touchmove", e => { if (e.touches && e.touches.length > 1 && !(e.target.closest && e.target.closest(".zv-stage"))) e.preventDefault(); }, {passive:false});
 
 // ─────────────────────────────────────────────────────────────
 // Sons de la séance guidée.
@@ -3845,9 +3855,6 @@ function setupHTML(){
   <h1 class="h1d">${it.name}</h1>
   <div class="sx-sum"><span><b>${n}</b> point${n > 1 ? "s" : ""}</span><span><b>${steps.length}</b> étape${steps.length > 1 ? "s" : ""}</span><span><b>${fmtTotal(total)}</b> en tout</span></div>
 
-  <h3 class="grp-t">Votre gêne maintenant · facultatif</h3>
-  <div class="grp"><div class="grp-row col">${scale("before", SU.before)}<span class="grp-sub">0 = aucune gêne, 10 = la pire possible. Vous la noterez à nouveau à la fin.</span></div></div>
-
   <h3 class="grp-t">Minuteur</h3>
   <div class="grp">
    <div class="grp-row col"><span class="grp-l">Durée par point</span>${segc("dur", SESS_DUR.map(d => [d, fmtDur(d)]), o.dur, "Durée par point")}</div>
@@ -4050,7 +4057,7 @@ function playAction(t){
  if (a === "rate"){ SS.after = SS.after === +t.dataset.v ? null : +t.dataset.v; renderPlayer(); return; }
  if (a === "restart"){ SS.t0 = Date.now(); SS.after = null; ambStart(SU.opts.amb, 3); keepAwake(true); goStep(0); return; }
  if (a === "done"){
-  S.hist.push({t:Date.now(), ref:SU.ref, name:SU.it.name, dur:SS.dur, n:new Set(SS.steps.map(x => x.id)).size, before:SU.before, after:SS.after});
+  S.hist.push({t:Date.now(), ref:SU.ref, name:SU.it.name, dur:SS.dur, n:new Set(SS.steps.map(x => x.id)).size, before:null, after:null});
   S.hist = S.hist.slice(-50); save();
   stopSession(); pop(); pop(); return;
  }
@@ -4064,18 +4071,15 @@ function endHTML(){
   <div class="sg-end-hero"><span class="sg-end-ic">${msi("spa", true)}</span>
    <h1>Séance terminée</h1><p>Prenez un instant. Restez assis une minute, respirez calmement avant de vous lever.</p></div>
   <div class="sg-stats"><div><b>${n}</b><span>point${n > 1 ? "s" : ""}</span></div><div><b>${SS.steps.length}</b><span>étape${SS.steps.length > 1 ? "s" : ""}</span></div><div><b>${fmtTotal(SS.dur)}</b><span>en tout</span></div></div>
-  <h3 class="grp-t">Votre gêne maintenant · facultatif</h3>
-  <div class="grp"><div class="grp-row col">${scale("after", a)}<span class="grp-sub">0 = aucune gêne, 10 = la pire possible. Gardée dans Profil pour suivre vos séances.</span></div></div>
-  ${cmp}
  </article>
  <div class="sx-dock two"><button class="btn btn-soft btn-go" data-s="restart">${msi("replay")}Recommencer</button><button class="btn btn-primary btn-go" data-s="done">Terminer</button></div>`;
 }
 function histHTML(){
- if (!S.hist.length) return `<div class="list-card" style="padding:16px;color:var(--muted);font-size:.9375rem">Vos séances guidées apparaîtront ici, avec la gêne avant et après.</div>`;
+ if (!S.hist.length) return `<div class="list-card" style="padding:16px;color:var(--muted);font-size:.9375rem">Vos séances guidées apparaîtront ici, avec leur date et leur durée.</div>`;
  const rows = S.hist.slice().reverse().slice(0, 12).map(h => {
   const d = new Date(h.t);
   const when = d.toLocaleDateString("fr-CH", {day:"numeric", month:"short"}) + " · " + d.toLocaleTimeString("fr-CH", {hour:"2-digit", minute:"2-digit"});
-  const g = h.before != null && h.after != null ? ` · gêne ${h.before} → ${h.after}` : h.after != null ? ` · gêne après : ${h.after}/10` : "";
+  const g = "";
   const brh = h.ref.startsWith("breath:");
   return `<li><button class="lrow" ${brh ? `data-breath="${h.ref.slice(7)}"` : `data-sym="${h.ref}"`}><span class="hist-ic">${msi(brh ? "air" : "history")}</span><span><b>${h.name}</b><small>${when} · ${fmtTotal(h.dur)}${g}</small></span>${CHEV}</button></li>`;
  }).join("");
@@ -4666,7 +4670,7 @@ function screenPratiquer(){
  ${facts([
   ["Prenez votre temps", "Restez assis une minute avant de vous lever."],
   ["Ce qui est normal", "Une sensibilité sur le point quelques heures, une détente, parfois un peu de fatigue."],
-  ["Notez l'effet", "La gêne de 0 à 10, avant et après. La séance guidée vous la demande et la garde dans Profil. En une semaine, vous saurez ce qui vous aide."],
+  ["Notez l'effet", "Notez votre gêne de 0 à 10 avant et après, par exemple dans un carnet. En une semaine, vous saurez ce qui vous aide."],
   ["Pas d'effet", "Après deux ou trois semaines, changez de points ou demandez conseil à un praticien."]
  ])}
 
@@ -4769,7 +4773,7 @@ function screenProfil(){
   ${PL.man && PL.man.credit ? `<p><b>Illustrations.</b> ${plEsc(PL.man.credit)}</p>` : ""}
   <p><b>Sons.</b> Enregistrements libres de droits, adaptés pour boucler sans coupure. Pluie : <a href="https://freesound.org/people/alex36917/sounds/524605/" target="_blank" rel="noopener">alex36917</a> ; vagues : <a href="https://freesound.org/people/Luftrum/sounds/48412/" target="_blank" rel="noopener">Luftrum</a> (Freesound, licence CC BY) ; oiseaux : kvgarlic ; ruisseau : gluckose (CC0), via l'application Blanket. Forêt, feu de bois, grillons, carillon, tonnerre, chouette et bol chantant : via l'application Moodist (CC0 ou licence Pixabay). Le piano, la nappe et les bruits sont fabriqués par l'app.</p>
  </div></div>
- <p class="fine">Version 33.</p>`;
+ <p class="fine">Version 33.1.</p>`;
 }
 
 // ── Premier lancement : choix de la silhouette ───────────────
@@ -4963,7 +4967,7 @@ function walkBind(el){
 function openBody(id){
  const p = BY[id]; if (!p) return;
  const F = bodyFigHTML(p);
- push(`${bar(code(p) + " · sur le corps")}
+ push(`<div class="body-x-wrap"><button class="body-x" data-act="back" aria-label="Fermer et revenir au point ${code(p)}">${msi("close")}</button></div>${bar(code(p) + " · sur le corps")}
  <article class="detail">
   <h1 class="h1d">Où se trouve ${code(p)}</h1>
   <p class="sub">${p.py} · ${sidesTxt(p).toLowerCase()}</p>
