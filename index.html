@@ -1338,6 +1338,20 @@ html{touch-action:manipulation}
 .body-x .msi{font-size:24px}
 .body-x:active{transform:scale(.94)}
 
+/* v34c-4 : note de planche (manifeste) sous la légende */
+.pl-note{margin:.35rem .9rem .7rem;font-size:.82rem;line-height:1.35;color:var(--ink-2, #555)}
+
+/* v34c-5 : icônes de secours hors ligne (police Material Symbols indisponible) */
+.no-msi .msi{font-size:0!important;font-family:inherit;max-width:none}
+.no-msi .msi::before{content:attr(data-sym);font-size:20px;line-height:1;font-family:system-ui,sans-serif}
+.no-msi .tabs .msi::before{font-size:24px}
+
+/* v34c-5 (relecture 5, M6) : les deux plantes côte à côte dans la vue « sur le corps » */
+.pl-body2{display:flex;gap:8px;justify-content:center}
+.pl-body2 .pl-body-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:4px}
+.pl-body2 .plate.pl-body-half{position:relative}
+.pl-body-lab{display:block;text-align:center;font-size:12px;line-height:1.3;color:var(--muted)}
+
 </style>
 </head>
 <body>
@@ -1434,7 +1448,7 @@ const POINTS = [
 {id:"LU1",m:"LU",n:1,py:"Zhōngfǔ",hz:"中府",tr:"Palais central",v:"front",x:116,y:205,reg:"tronc",
  cat:["Mu du Poumon","Croisement avec la Rate"],
  loc:"Sur le haut de la poitrine, à la hauteur du 1er espace entre les côtes, juste en dehors du creux situé sous la clavicule, à 6 cun du milieu du sternum.",
- rep:"Trouvez le creux sous le bout de la clavicule, côté épaule. Descendez d'une largeur de pouce : le point est là, sur le haut de la poitrine, nettement en dehors de la verticale du mamelon (environ deux doigts joints plus loin).",
+ rep:"Trouvez le creux sous le bout de la clavicule, côté épaule. Descendez d'une largeur de pouce : le point est là, sur le haut de la poitrine, nettement en dehors de la verticale du mamelon (environ trois doigts joints plus loin, soit 2 cun).",
  fn:["Aide à respirer plus librement","Calme la toux et l'essoufflement","Soulage une poitrine serrée"],
  fnt:["Fait descendre et disperse le Qi du Poumon","Arrête la toux et calme l'essoufflement","Ouvre la poitrine"],
  ind:"Toux, asthme, poitrine serrée, douleur de l'épaule.",
@@ -1877,7 +1891,7 @@ const POINTS = [
 {id:"PC8",d:{v:"armP",x:138,y:440},lm:["poing"],m:"PC",n:8,py:"Láogōng",hz:"劳宫",tr:"Palais du labeur",v:"front",x:58,y:573,reg:"bras",
  cat:["Ying-source (Feu)"],
  loc:"Au creux de la paume, entre les os de l'index et du majeur (2e et 3e métacarpiens), un peu en arrière des jointures.",
- rep:"Fermez le poing : le bout du majeur touche le point, au creux de la paume.",
+ rep:"Fermez le poing : le bout du majeur touche le point, au creux de la paume. Si le majeur tombe entre le 3e et le 4e métacarpien, c'est l'emplacement alternatif admis par l'OMS ; l'emplacement principal reste entre le 2e et le 3e.",
  fn:["Calme l'agitation et la sensation de chaleur","Apaise l'esprit"],
  fnt:["Clarifie la Chaleur du Cœur","Calme l'esprit"],
  ind:"Agitation, aphtes, mains moites et chaudes.",
@@ -2738,6 +2752,7 @@ function landmarkLayer(v, on, u, showLabels=true, box=null){
 // Uniquement des déclarations : S, BY, code()… viennent de app.js.
 // ─────────────────────────────────────────────────────────────
 const PL_DIR = "plates/";
+const PL_V = "?v=34"; // change à chaque nouvelle série de planches (cache iPhone)
 const PL = { man:null, loc:{}, bb:{}, small:{} };
 
 function plLoad(){
@@ -2756,7 +2771,7 @@ function plSmall(){
 }
 function plSrc(f, small){ // [url, w, h] ou null
  const s = small && PL.small[f];
- return s ? [PL_DIR + "s/" + f, s[0], s[1]] : null;
+ return s ? [PL_DIR + "s/" + f + PL_V, s[0], s[1]] : null;
 }
 function plSubject(V){ // [x0,y0,x1,y1] du sujet, avec une petite marge ; sinon l'image entière
  const W = V.s.w, H = V.s.h, b = PL.bb[V.s.img];
@@ -2773,7 +2788,7 @@ function plLocSizes(){
    const im = new Image();
    im.onload = () => { PL.loc[k + w] = {w: im.naturalWidth, h: im.naturalHeight}; res(); };
    im.onerror = () => res();
-   im.src = PL_DIR + f;
+   im.src = PL_DIR + f + PL_V;
   }));
  }
  return Promise.all(jobs);
@@ -2842,10 +2857,14 @@ function plFace(face, limb, side){
  const f = norm(face || ""), l = norm(limb || "");
  const hand = /\bmain/.test(l), foot = /pied/.test(l), head = /tete|visage|nuque|cou|crane/.test(l), trunk = /tronc|corps|dos|ventre|poitrine|bassin/.test(l);
  const sd = side === "L" ? " gauche" : side === "R" ? " droit" : "";
+ // v34c-3 : vues de trois-quarts et bord cubital de la main (légendes justes)
+ if (/3\/4|trois|anterolat/.test(f)) return trunk ? "trois-quarts" + (sd ? sd : "") : "vue de trois-quarts";
+ if (/petit doigt|cubital/.test(f) && hand) return "côté petit doigt";
  if (/^dors/.test(f)) return hand ? "dos de la main" : foot ? "dessus du pied" : "face dorsale";
  if (/^palm/.test(f)) return hand ? "paume" : "côté paume";
  if (/^plant/.test(f)) return "plante du pied";
  if (/^ant/.test(f)) return head || trunk ? "de face" : "face avant";
+ if (/^postero-?lat/.test(f)) return "trois-quarts arrière";   // v34c-4 (relecture 4, mineur 22) : hip_left
  if (/^post/.test(f)) return /^dos/.test(l) ? "" : head || trunk ? "de dos" : "face arrière";
  if (/^lat/.test(f)) return head ? "profil" + sd : trunk ? (sd ? "flanc" + sd : "de côté") : "côté extérieur";
  if (/^med/.test(f)) return "côté intérieur";
@@ -2900,9 +2919,36 @@ function plCrop(V, pts, o){
  const m = Math.min(Math.max((o.minCun != null ? o.minCun : 6) * c, (o.minFrac != null ? o.minFrac : .45) * Math.min(W, H)), Math.max(W, H));
  let w = Math.max(bw, m * Math.min(1, a)), h = Math.max(bh, m / Math.max(1, a));
  if (w / h < a) w = h * a; else h = w / a;
+ // v34c-4 (relecture 4, M8) : le cadre ne dépasse jamais l'image (plus de fond vide) ; le rapport largeur/hauteur s'adapte
+ if (h > H){ h = H; w = Math.min(W, Math.max(bw, H * a)); }
+ if (w > W){ w = W; h = Math.min(H, Math.max(bh, W / a)); }
  const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
- const x = w <= W ? plClamp(cx - w / 2, 0, W - w) : cx - w / 2;
- const y = h <= H ? plClamp(cy - h / 2, 0, H - h) : cy - h / 2;
+ let x = w <= W ? plClamp(cx - w / 2, 0, W - w) : plClamp(cx - w / 2, W - w, 0);   // v34c-4 : jamais plus de fond vide que nécessaire
+ let y = h <= H ? plClamp(cy - h / 2, 0, H - h) : plClamp(cy - h / 2, H - h, 0);
+ // v34c-3 : le point principal jamais à moins de 12 % du bord du cadrage (décalage, puis agrandissement si besoin)
+ const K = o.keep, f = .12;
+ // v34c-3 (relecture 3, M10) : si « l'unité reconnaissable » (genou, etc.) repousse le point dans le quart extérieur du
+ // cadrage, on recentre sur le point tant que tous les éléments à montrer restent dans le cadre (GB31 : hanche → genou)
+ if (K){
+  const fy = (K[1] - y) / h, fx = (K[0] - x) / w, mg = .5 * c;
+  // v34c-4 (relecture 4, M8) : seulement si le cadre tient dans l'image (jamais de fond vide ajouté)
+  if (h <= H && (fy < .25 || fy > .75)){ const ny = plClamp(K[1] - h / 2, 0, H - h);
+   if (pts.every(q => q[1] >= ny + mg && q[1] <= ny + h - mg)) y = ny; }
+  if (w <= W && (fx < .25 || fx > .75)){ const nx = plClamp(K[0] - w / 2, 0, W - w);
+   if (pts.every(q => q[0] >= nx + mg && q[0] <= nx + w - mg)) x = nx; }
+ }
+ if (K){
+  for (let it = 0; it < 4; it++){
+   let ok = true;
+   if (K[0] < x + f * w){ x = K[0] - f * w; ok = false; } else if (K[0] > x + (1 - f) * w){ x = K[0] - (1 - f) * w; ok = false; }
+   if (K[1] < y + f * h){ y = K[1] - f * h; ok = false; } else if (K[1] > y + (1 - f) * h){ y = K[1] - (1 - f) * h; ok = false; }
+   // un cadre plus grand que l'image la couvre entièrement et ne dépasse jamais plus que nécessaire (M8)
+   x = w <= W ? plClamp(x, 0, W - w) : plClamp(x, W - w, 0); y = h <= H ? plClamp(y, 0, H - h) : plClamp(y, H - h, 0);
+   const bad = K[0] < x + f * w - .5 || K[0] > x + (1 - f) * w + .5 || K[1] < y + f * h - .5 || K[1] > y + (1 - f) * h + .5;
+   if (!bad) break;
+   if (it < 3){ const g = 1.15; const nw = Math.min(w * g, W), nh = nw / (w / h); if (nh > H || nw <= w) break; x -= (nw - w) / 2; y -= (nh - h) / 2; w = nw; h = nh; }
+  }
+ }
  return [x, y, w, h];
 }
 
@@ -2927,17 +2973,46 @@ function plPlacer(cr, u, avoid, inset){
  const inE = (x, y, e) => ((x - e[0]) / e[2]) ** 2 + ((y - e[1]) / e[3]) ** 2 < 1;
  const inEll = r => av.some(e => inE(plClamp(e[0], r[0], r[0] + r[2]), plClamp(e[1], r[1], r[1] + r[3]), e));
  const inside = r => r[0] >= cr[0] + m && r[1] >= cr[1] + m && r[0] + r[2] <= cr[0] + cr[2] - m && r[1] + r[3] <= cr[1] + cr[3] - m && !inEll(r);
- const hit = (r, hardOnly) => occ.some(o => (!hardOnly || !o.soft) && r[0] < o[0] + o[2] && o[0] < r[0] + r[2] && r[1] < o[1] + o[3] && o[1] < r[1] + r[3]);
- // un trait de rappel ne traverse jamais une zone protégée (sauf celle d'où il part)
+ const pd = 2 * u;   // v34c-3 : jamais deux pastilles qui se touchent
+ const hit = (r, hardOnly) => occ.some(o => (!hardOnly || !o.soft) && r[0] - pd < o[0] + o[2] && o[0] < r[0] + r[2] + pd && r[1] - pd < o[1] + o[3] && o[1] < r[1] + r[3] + pd);
+ // v34c-2 : contraintes dures pour les traits de rappel (relecture 2) :
+ //  - jamais à travers une zone protégée (sauf celle d'où il part) ;
+ //  - jamais par-dessus un point ou un marqueur de repère (sauf le sien) ;
+ //  - jamais à travers une pastille déjà posée, ni à travers une règle cun, ni en croisant un autre trait.
+ const leads = [], segs = [], marks = [];
+ const cross = (a, b, c, d) => { const o = (p, q, r) => Math.sign((q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]));
+  return o(a, b, c) * o(a, b, d) < 0 && o(c, d, a) * o(c, d, b) < 0; };
+ const psd = (p, a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], L2 = dx * dx + dy * dy || 1;
+  const t = plClamp(((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / L2, 0, 1); return Math.hypot(p[0] - a[0] - t * dx, p[1] - a[1] - t * dy); };
+ const segRect = (a, b, r, sh) => { const R = [r[0] + sh, r[1] + sh, r[2] - 2 * sh, r[3] - 2 * sh];
+  if (R[2] <= 0 || R[3] <= 0) return false;
+  const inR = q => q[0] > R[0] && q[0] < R[0] + R[2] && q[1] > R[1] && q[1] < R[1] + R[3];
+  if (inR(a) || inR(b)) return true;
+  const c = [[R[0], R[1]], [R[0] + R[2], R[1]], [R[0] + R[2], R[1] + R[3]], [R[0], R[1] + R[3]]];
+  return [0, 1, 2, 3].some(i => cross(a, b, c[i], c[(i + 1) % 4])); };
+ const segHit = r => segs.some(sg => segRect(sg[0], sg[1], r, 0));
  const leadOK = (x, y, r) => {
-  const ex = plClamp(x, r[0], r[0] + r[2]), ey = plClamp(y, r[1], r[1] + r[3]);
-  const S = [...Array(24).keys()].map(i => [x + (ex - x) * i / 23, y + (ey - y) * i / 23]);
-  // ni à travers une zone protégée (sauf celle d'où il part), ni à travers un point
-  return av.every(e => inE(x, y, e) || !S.some(q => inE(q[0], q[1], e)))
-   && occ.every(o => !o.dot || (x >= o[0] && x <= o[0] + o[2] && y >= o[1] && y <= o[1] + o[3]) || !S.some(q => q[0] > o[0] + o[2] * .2 && q[0] < o[0] + o[2] * .8 && q[1] > o[1] + o[3] * .2 && q[1] < o[1] + o[3] * .8));
+  const O = [x, y], E = [plClamp(x, r[0], r[0] + r[2]), plClamp(y, r[1], r[1] + r[3])];
+  if (Math.hypot(E[0] - x, E[1] - y) < 1) return true;
+  if (leads.some(L => cross(O, E, L[0], L[1]))) return false;
+  if (segs.some(sg => psd(O, sg[0], sg[1]) > 3 * u && (cross(O, E, sg[0], sg[1]) || psd(sg[0], O, E) < 1.5 * u || psd(sg[1], O, E) < 1.5 * u))) return false;
+  if (marks.some(mk => { const d0 = Math.hypot(mk[0] - x, mk[1] - y);
+   if (d0 < u) return false;                                   // son propre marqueur
+   if (d0 < mk[2] + 2 * u) return psd(mk, O, E) < d0 - .5 * u;  // départ dans un marqueur voisin : s'en éloigner
+   return psd(mk, O, E) < mk[2] + 2 * u; })) return false;
+  if (occ.some(o => o.pill && segRect(O, E, o, u))) return false;
+  const S = [...Array(24).keys()].map(i => [x + (E[0] - x) * i / 23, y + (E[1] - y) * i / 23]);
+  return av.every(e => inE(x, y, e) || !S.some(q => inE(q[0], q[1], e)));
  };
  return {
-  block(x, y, rad, soft, dot){ const o = [x - rad, y - rad, 2 * rad, 2 * rad]; if (soft) o.soft = true; if (dot) o.dot = true; occ.push(o); },
+  block(x, y, rad, soft, dot){ const o = [x - rad, y - rad, 2 * rad, 2 * rad]; if (soft) o.soft = true; if (dot){ o.dot = true; marks.push([x, y, rad * .6]); } occ.push(o); },
+  // marqueur (repère, point) que les traits ne doivent jamais traverser
+  mark(x, y, rad){ marks.push([x, y, rad]); },
+  // segment de règle (cun) : ni trait ni pastille par-dessus
+  seg(a, b){ segs.push([a, b]); },
+  // v34c-3 : pastilles de règle posées APRÈS les repères (les repères gardent leur côté ; la règle a plusieurs ancres)
+  later: [],
+  flush(){ let s = ""; for (const f of this.later) s += f(); this.later.length = 0; return s; },
   // o.hide : renvoie null s'il n'y a aucune place libre (l'étiquette est alors masquée)
   place(x, y, tw, th, d, order, o){
    o = o || {};
@@ -2953,17 +3028,64 @@ function plPlacer(cr, u, avoid, inset){
    for (const dy of [0, -1.3, 1.3, -2.6, 2.6, -4, 4]) for (const ex of (x > cr[0] + cr[2] / 2 ? [1, 0] : [0, 1]))
     far.push([ex ? cr[0] + cr[2] - m - tw : cr[0] + m, y - th / 2 + dy * th, 9]);
    const cands = keys.map(key => C[key]).concat(far);
-   let fb = null;
-   for (const c of cands){
-    const r = [c[0], c[1], tw, th]; if (!inside(r)) continue;
-    const lead = c[2] > 2.5; if (lead && !leadOK(x, y, r)) continue;
-    if (!hit(r)){ occ.push(r); if (lead) r.lead = true; return r; }
-    if (!fb && !hit(r, true)){ fb = r; if (lead) r.lead = true; }
-   }
-   if (fb){ occ.push(fb); return fb; }        // seulement sur le trait du méridien
+   const gap = r => Math.hypot(plClamp(x, r[0], r[0] + r[2]) - x, plClamp(y, r[1], r[1] + r[3]) - y);
+   const take = r => { r.pill = true; occ.push(r);
+    // toute étiquette éloignée de son ancre reçoit un trait (jamais de pastille « flottante »)
+    const ox = r.origin ? r.origin[0] : x, oy = r.origin ? r.origin[1] : y;
+    if (r.lead || gap(r) > 1.6 * d){ r.lead = true; leads.push([[ox, oy], [plClamp(ox, r[0], r[0] + r[2]), plClamp(oy, r[1], r[1] + r[3])]]); }
+    return r; };
+   // v34c-3 : une étiquette est toujours plus près de son ancre que de tout autre point / repère, et du même côté
+   // que son repère (o.side = [x du point, signe]) : plus d'étiquette du « mauvais côté » (ST41, LI20, BL2)
+   let nearF = 1;   // passe 3 : tolérance (un autre repère jusqu'à 1,4× plus proche) quand les repères sont groupés
+   const sideOK = r => {
+    const cx = r[0] + r[2] / 2, cy = r[1] + r[3] / 2, dOwn = Math.hypot(cx - x, cy - y);
+    if (o.near && o.near.some(q => Math.hypot(cx - q[0], cy - q[1]) * (nearF > 1 ? 1.4 : 1) < dOwn - 2 * u)) return false;
+    if (o.side && o.side[1] && Math.abs(cx - o.side[0]) > 10 * u && Math.sign(cx - o.side[0]) !== o.side[1]) return false;
+    // passe 5 : une étiquette large peut déborder de l'autre côté, mais jamais être entièrement du mauvais côté
+    if (o.weak && o.weak[1] && (o.weak[1] > 0 ? r[0] + r[2] < o.weak[0] + 10 * u : r[0] > o.weak[0] - 10 * u)) return false;
+    return true; };
+   const tryC = (list) => {
+    let fb = null;
+    for (const c of list){
+     const r = [c[0], c[1], tw, th]; if (!inside(r) || segHit(r) || leads.some(L => segRect(L[0], L[1], r, u)) || !sideOK(r) || (o.maxGap && gap(r) > o.maxGap)) continue;
+     const lead = c[2] > 2.5 || gap(r) > 1.6 * d; if (lead && !leadOK(x, y, r)) continue;
+     if (lead) r.lead = true;
+     if (!hit(r)) return take(r);
+     if (!fb && !hit(r, true)) fb = r;
+    }
+    return fb ? take(fb) : null; };   // fb : seulement sur le trait du méridien
+   let got = tryC(cands);
+   if (got) return got;
+   // second passage : grille large sur tout le cadrage (trait de rappel plus long plutôt qu'étiquette masquée)
+   const wide = [];
+   for (let gy = cr[1] + m; gy <= cr[1] + cr[3] - m - th; gy += th * .6)
+    for (let gx = cr[0] + m; gx <= cr[0] + cr[2] - m - tw; gx += tw * .25) wide.push([gx, gy, 9]);
+   wide.sort((a, b) => Math.hypot(a[0] + tw / 2 - x, a[1] + th / 2 - y) - Math.hypot(b[0] + tw / 2 - x, b[1] + th / 2 - y));
+   got = tryC(wide);
+   if (got) return got;
+   const av0 = av.splice(0, av.length);   // passe 3 : sans les zones du visage
+   got = tryC(cands.concat(wide));
+   if (!got){ nearF = 2; got = tryC(cands.concat(wide)); }   // passe 4 : règle « plus proche » tolérante (repères groupés)
+   if (!got){ const nr = o.near, sd = o.side; o.near = null; o.side = null; o.weak = sd; got = tryC(cands.concat(wide)); o.near = nr; o.side = sd; o.weak = null; }   // passe 5 : règle de côté faible
+   av.push(...av0); nearF = 1;
+   if (got) return got;
+   if (o.tryOnly) return null;   // l'appelant essaie d'abord d'autres ancres (règles cun : milieu, puis extrémités)
+   // v34c-3 (relecture 3, M8/M9) : jamais d'étiquette masquée ni de pastille sur un point : place libre la plus proche,
+   // trait de rappel même long (il ne traverse toujours ni point, ni pastille, ni règle) ; côté du repère d'abord
+   const wk = r => !(o.side && o.side[1]) || (o.side[1] > 0 ? r[0] + r[2] >= o.side[0] + 10 * u : r[0] <= o.side[0] - 10 * u);
+   for (const sideFirst of [true, false]) for (const c of wide){ const r = [c[0], c[1], tw, th]; if (!inside(r) || hit(r, true) || segHit(r) || leads.some(L => segRect(L[0], L[1], r, u))) continue;
+    if (sideFirst && !wk(r)) continue;
+    const og = (o.origins || [[x, y]]).find(q => leadOK(q[0], q[1], r)); if (!og) continue;   // o.origins : autres départs possibles du trait (règle cun)
+    if (og[0] !== x || og[1] !== y) r.origin = og; r.lead = true; return take(r); }
+   const thruPill = r => { const E = [plClamp(x, r[0], r[0] + r[2]), plClamp(y, r[1], r[1] + r[3])]; return occ.some(o => o.pill && segRect([x, y], E, o, u)); };
+   for (const c of wide){ const r = [c[0], c[1], tw, th]; if (!inside(r) || hit(r, true) || segHit(r) || thruPill(r)) continue; r.lead = true; return take(r); }
+   for (const c of wide){ const r = [c[0], c[1], tw, th]; if (!inside(r) || hit(r, true) || segHit(r)) continue; r.lead = true; return take(r); }
    if (o.hide) return null;
+   // dernier recours (règles cun) : jamais sur un point
+   for (const c of cands.concat(wide)){ const r = [c[0], c[1], tw, th]; if (inside(r) && !occ.some(q => q.dot && r[0] < q[0] + q[2] && q[0] < r[0] + r[2] && r[1] < q[1] + q[3] && q[1] < r[1] + r[3]) && (gap(r) <= 1.6 * d || leadOK(x, y, r))){ if (gap(r) > 1.6 * d) r.lead = true; r.pill = true; occ.push(r); return r; } }
+   for (const c of wide){ const r = [c[0], c[1], tw, th]; if (occ.some(q => q.dot && r[0] < q[0] + q[2] && q[0] < r[0] + r[2] && r[1] < q[1] + q[3] && q[1] < r[1] + r[3])) continue; r.lead = gap(r) > 1.6 * d; return take(r); }
    const r = [plClamp(cands[0][0], cr[0] + m, cr[0] + cr[2] - m - tw), plClamp(cands[0][1], cr[1] + m, cr[1] + cr[3] - m - th), tw, th];
-   occ.push(r); return r;
+   r.pill = true; occ.push(r); return r;
   }
  };
 }
@@ -2983,18 +3105,23 @@ function plPill(r, txt, fs, cls){
 const plDot = (x, y, u, cls, pulse) => `<g class="pl-pt${cls ? " " + cls : ""}">${pulse ? `<circle class="pl-halo" cx="${plN(x)}" cy="${plN(y)}" r="${plN(17 * u)}"/>` : ""}<circle class="pl-dot" cx="${plN(x)}" cy="${plN(y)}" r="${plN(7.5 * u)}"/></g>`;
 
 // Mesure en cun : ligne de cote fine, parallèle au segment repère → point.
-function plCun(a, b, text, u, cr, P){
+function plCun(a, b, text, u, cr, P, lmPts){
  let dx = b[0] - a[0], dy = b[1] - a[1]; const L = Math.hypot(dx, dy); if (L < 4 * u) return "";
  dx /= L; dy /= L;
  const fs = 12.5 * u, tw = plTW(text, fs) + 14 * u, th = fs + 9 * u, off = 18 * u;
  let out = "";
- for (const sg of [1, -1]){
+ // v34c-5 (relecture 5, M4) : la règle se met du côté où aucun repère ne se trouve le long de la cote (PC6 f : la règle
+ // du côté radial enfermait le repère du grand palmaire, dont l'étiquette partait alors du côté cubital)
+ const busy = sg => (lmPts || []).filter(q => { const t_ = (q[0] - a[0]) * dx + (q[1] - a[1]) * dy, n_ = ((q[0] - a[0]) * -dy + (q[1] - a[1]) * dx) * sg;
+  return t_ > -6 * u && t_ < L + 6 * u && n_ > 0 && n_ < off + 14 * u; }).length;
+ const sides = busy(1) > 0 && busy(-1) === 0 ? [-1, 1] : [1, -1];
+ for (const sg of sides){
   const nx = -dy * sg, ny = dx * sg;
   const A = [a[0] + nx * off, a[1] + ny * off], B = [b[0] + nx * off, b[1] + ny * off];
   const mx = (A[0] + B[0]) / 2 + nx * (th / 2 + 6 * u), my = (A[1] + B[1]) / 2 + ny * (th / 2 + 6 * u);
   const r = [mx - tw / 2, my - th / 2, tw, th];
   const fits = r[0] >= cr[0] && r[1] >= cr[1] && r[0] + tw <= cr[0] + cr[2] && r[1] + th <= cr[1] + cr[3] && Math.min(A[0], B[0]) > cr[0] && Math.max(A[0], B[0]) < cr[0] + cr[2];
-  if (!fits && sg === 1) continue;
+  if (!fits && sg === sides[0]) continue;
   const t = 5 * u;
   out = `<g class="pl-cun"><path class="ext" d="M${plN(a[0] + nx * 4 * u)} ${plN(a[1] + ny * 4 * u)}L${plN(A[0] + nx * t)} ${plN(A[1] + ny * t)}M${plN(b[0] + nx * 9 * u)} ${plN(b[1] + ny * 9 * u)}L${plN(B[0] + nx * t)} ${plN(B[1] + ny * t)}"/>`
    + `<path class="dim" d="M${plN(A[0])} ${plN(A[1])}L${plN(B[0])} ${plN(B[1])}M${plN(A[0] - nx * t)} ${plN(A[1] - ny * t)}L${plN(A[0] + nx * t)} ${plN(A[1] + ny * t)}M${plN(B[0] - nx * t)} ${plN(B[1] - ny * t)}L${plN(B[0] + nx * t)} ${plN(B[1] + ny * t)}"/></g>`;
@@ -3002,9 +3129,17 @@ function plCun(a, b, text, u, cr, P){
   const cx = (A[0] + B[0]) / 2, cy = (A[1] + B[1]) / 2;
   const nL = Math.max(2, Math.ceil(Math.hypot(B[0] - A[0], B[1] - A[1]) / (8 * u)));
   for (let i = 0; i <= nL; i++) P.block(A[0] + (B[0] - A[0]) * i / nL, A[1] + (B[1] - A[1]) * i / nL, 4 * u);
-  const rr = P.place(cx, cy, tw, th, 6 * u, order);
-  if (rr.lead){ out += `<path class="pl-lead pl-lead-cun" d="M${plN(cx)} ${plN(cy)}L${plN(plClamp(cx, rr[0], rr[0] + tw))} ${plN(plClamp(cy, rr[1], rr[1] + th))}"/>`; }
-  return out + plPill(rr, text, fs, "pl-cun-t");
+  P.seg(A, B); P.seg([a[0] + nx * 4 * u, a[1] + ny * 4 * u], [A[0] + nx * t, A[1] + ny * t]); P.seg([b[0] + nx * 9 * u, b[1] + ny * 9 * u], [B[0] + nx * t, B[1] + ny * t]);
+  P.seg([A[0] - nx * t, A[1] - ny * t], [A[0] + nx * t, A[1] + ny * t]); P.seg([B[0] - nx * t, B[1] - ny * t], [B[0] + nx * t, B[1] + ny * t]);
+  // ancre de la pastille : milieu de la cote, sinon ses extrémités (une cote courte près d'un point enfermait le trait)
+  const qA = [A[0] + (B[0] - A[0]) * .15, A[1] + (B[1] - A[1]) * .15], qB = [A[0] + (B[0] - A[0]) * .85, A[1] + (B[1] - A[1]) * .85];
+  P.later.push(() => {
+   let o_ = [cx, cy], rr = null;
+   for (const q of [[cx, cy], qB, qA]){ rr = P.place(q[0], q[1], tw, th, 6 * u, order, {tryOnly: true}); if (rr){ o_ = q; break; } }
+   if (!rr){ rr = P.place(cx, cy, tw, th, 6 * u, order, {origins: [[cx, cy], qB, qA, B, A]}); if (rr.origin) o_ = rr.origin; }
+   const ld = rr.lead ? `<path class="pl-lead pl-lead-cun" d="M${plN(o_[0])} ${plN(o_[1])}L${plN(plClamp(o_[0], rr[0], rr[0] + tw))} ${plN(plClamp(o_[1], rr[1], rr[1] + th))}"/>` : "";
+   return ld + plPill(rr, text, fs, "pl-cun-t"); });
+  return out;
  }
  return out;
 }
@@ -3019,10 +3154,17 @@ function plCunPath(pts, text, u, P){
  const n = pts.length;
  let out = `<g class="pl-cun"><path class="dim" d="${d}${tick(pts[0], pts[1])}${tick(pts[n - 1], pts[n - 2])}"/></g>`;
  pts.forEach(q => P.block(q[0], q[1], 4 * u));
- const m = pts[Math.floor(n / 2)];
- const rr = P.place(m[0], m[1], tw, th, 6 * u, ["t", "tr", "tl", "b"]);
- if (rr.lead){ out += `<path class="pl-lead pl-lead-cun" d="M${plN(m[0])} ${plN(m[1])}L${plN(plClamp(m[0], rr[0], rr[0] + tw))} ${plN(plClamp(m[1], rr[1], rr[1] + th))}"/>`; }
- return out + plPill(rr, text, fs, "pl-cun-t");
+ for (let i = 1; i < n; i++) P.seg(pts[i - 1], pts[i]);
+ // v34c-5 (relecture 5, M4) : pastille de la règle courbe posée APRÈS les repères, comme la règle droite (PC6 f : elle
+ // occupait le côté radial, et l'étiquette du grand palmaire partait du côté cubital) ; ancres : milieu puis extrémités
+ const m = pts[Math.floor(n / 2)], qa = pts[Math.max(0, Math.floor(n * .2))], qb = pts[Math.min(n - 1, Math.floor(n * .8))];
+ P.later.push(() => {
+  let o_ = m, rr = null;
+  for (const q of [m, qb, qa]){ rr = P.place(q[0], q[1], tw, th, 6 * u, ["t", "tr", "tl", "b"], {tryOnly: true}); if (rr){ o_ = q; break; } }
+  if (!rr) rr = P.place(m[0], m[1], tw, th, 6 * u, ["t", "tr", "tl", "b"]);
+  const ld = rr.lead ? `<path class="pl-lead pl-lead-cun" d="M${plN(o_[0])} ${plN(o_[1])}L${plN(plClamp(o_[0], rr[0], rr[0] + tw))} ${plN(plClamp(o_[1], rr[1], rr[1] + th))}"/>` : "";
+  return ld + plPill(rr, text, fs, "pl-cun-t"); });
+ return out;
 }
 
 // Images de la vue, cadrées en pourcentages : aucune variation de mise en page.
@@ -3032,7 +3174,7 @@ function plImgs(V, cr, flip, small){
  // en élément HTML géant (calques énormes qui faisaient planter Safari iOS
  // au zoom), et le miroir se fait à l'intérieur du SVG.
  const W = V.s.w, H = V.s.h;
- const one = (f, cls) => { const sm = plSrc(f, small); const src = sm ? sm[0] : PL_DIR + plEsc(f);
+ const one = (f, cls) => { const sm = plSrc(f, small); const src = sm ? sm[0] : PL_DIR + plEsc(f) + PL_V;
   return `<image class="${cls}" data-src="${src}" href="${PL_BLANK}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="none"/>`; };
  const g = one(V.s.img, "pl-img") + (V.s.rep ? one(V.s.rep, "pl-rep") : "");
  return `<svg class="pl-imgs" viewBox="${cr.map(plN).join(" ")}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${flip ? `<g transform="translate(${W} 0) scale(-1 1)">${g}</g>` : g}</svg>`;
@@ -3068,7 +3210,7 @@ function plLocSVG(V, flip){
  const mn = sz.h * .07;
  if (w < mn){ x -= (mn - w) / 2; w = mn; }
  if (h < mn){ y -= (mn - h) / 2; h = mn; }
- return `<svg class="loc-svg" viewBox="0 0 ${sz.w} ${sz.h}" aria-hidden="true"><image href="${PL_DIR}${plEsc(f)}" width="${sz.w}" height="${sz.h}"/><rect class="loc-r" x="${plN(x)}" y="${plN(y)}" width="${plN(w)}" height="${plN(h)}" rx="${plN(sz.h * .014)}"/></svg>`;
+ return `<svg class="loc-svg" viewBox="0 0 ${sz.w} ${sz.h}" aria-hidden="true"><image href="${PL_DIR}${plEsc(f)}${PL_V}" width="${sz.w}" height="${sz.h}"/><rect class="loc-r" x="${plN(x)}" y="${plN(y)}" width="${plN(w)}" height="${plN(h)}" rx="${plN(sz.h * .014)}"/></svg>`;
 }
 // Ancien système : vignette faite des silhouettes SVG.
 const OLD_LOC = {armP:["front", [36, 388, 70, 210]], armD:["back", [36, 388, 70, 210]], medial:["front", [112, 590, 96, 410]], sole:["front", [120, 905, 64, 95]]};
@@ -3171,7 +3313,10 @@ function plPointFig(p, M, o){
  const lms = rich ? (Array.isArray(e.lm) ? e.lm : []).slice(0, 3).map(l => ({t: plLbl(l.label), xy: fx(plXY(l, k))})).filter(l => l.xy && l.t) : [];
  // mesure en cun du côté miroir quand le côté principal porte déjà les repères :
  // chaque côté garde son sourcil (ou son repère de départ) bien visible
- if (cun && P1 && act === "both" && lms.length){ const mx = q => [P0[0] + P1[0] - q[0], q[1]]; cun.a = mx(cun.a); cun.b = mx(cun.b); if (cun.path) cun.path = cun.path.map(mx); }
+ // v34c-6 (relecture 6, mineur 18) : pas de bascule quand un repère est dans l'axe de la règle (VB 14 : pupille sous la règle,
+ // la règle et la pupille restent du même côté)
+ const inAxis = cun && lms.some(l => Math.abs(l.xy[0] - cun.a[0]) < .4 * V.cun && Math.abs(l.xy[0] - cun.b[0]) < .4 * V.cun);
+ if (cun && P1 && act === "both" && lms.length && !inAxis){ const mx = q => [P0[0] + P1[0] - q[0], q[1]]; cun.a = mx(cun.a); cun.b = mx(cun.b); if (cun.path) cun.path = cun.path.map(mx); }
  const focus = [P0];
  if (P1) focus.push(P1);
  EX.forEach(q => focus.push(q));
@@ -3179,7 +3324,10 @@ function plPointFig(p, M, o){
  lms.forEach(l => focus.push(l.xy));
  let asp = o.aspect || 1;
  if (asp === "auto"){ const [[a0, b0], [a1, b1]] = plUnitBox(V, focus); asp = plClamp((a1 - a0) / (b1 - b0), .75, 1.33); }
- const cr = plCrop(V, focus, {aspect: asp, pad: ctx === "card" ? 1.4 : 1.8, minCun: ctx === "card" ? 5.5 : 6.5, minFrac: ctx === "card" ? .42 : .48});
+ // v34c-5 (relecture 5, mineur 12) : paire de points très proches (Ding Chuan, 1 cun entre les deux) : cadrage plus serré pour
+ // que les deux points, le repère entre eux et la règle restent lisibles
+ const tight = rich && P1 && act === "both" && Math.hypot(P1[0] - P0[0], P1[1] - P0[1]) < 1.5 * V.cun;
+ const cr = plCrop(V, focus, {aspect: asp, pad: ctx === "card" ? 1.4 : 1.8, minCun: tight ? 4.5 : (ctx === "card" ? 5.5 : 6.5), minFrac: tight ? .3 : (ctx === "card" ? .42 : .48), unit: tight ? false : undefined, keep: act === "mir" ? P1 : P0});
  const u = cr[2] / (o.w || 340);
  const P = plPlacer(cr, u, plAvoid(V, flip), ctx === "card" ? [44, 58] : [62, 80]);
  let g = "", lab = "";
@@ -3187,34 +3335,56 @@ function plPointFig(p, M, o){
  const msegs = plMerSegs(V, p.m, flip);
  g += plMerSVG(msegs, u, cr, P, {near: act === "mir" ? P1 : P0, light: ctx === "card", chev: ctx !== "card"});
  // une étiquette ne couvre jamais son repère
- lms.forEach(l => P.block(l.xy[0], l.xy[1], 11 * u));
+ // v34c-4 (relecture 4, mineurs 15-16) : un repère qui tombe sous le point (le point EST sur ce repère : tête du sourcil,
+ // aile du nez, sous C7...) n'a pas de marqueur caché sous la pastille : son étiquette part du bord du point
+ lms.forEach(l => { const q = [P0, P1, ...EX].filter(Boolean).find(q => Math.hypot(q[0] - l.xy[0], q[1] - l.xy[1]) < 14 * u);   // v34c-5 : marqueur coincé contre un point (DINGCHUAN)
+  if (q){ let dx = l.xy[0] - q[0], dy = l.xy[1] - q[1]; const L = Math.hypot(dx, dy); if (L < .5 * u){ dx = 0; dy = -1; } else { dx /= L; dy /= L; }
+   l.xy = [q[0] + dx * 8.5 * u, q[1] + dy * 8.5 * u]; l.onPt = true; } });
+ lms.forEach(l => { if (!l.onPt){ P.block(l.xy[0], l.xy[1], 11 * u); P.mark(l.xy[0], l.xy[1], 4.5 * u); } });
  if (cun){ P.block(cun.a[0], cun.a[1], 9 * u); P.block(cun.b[0], cun.b[1], 9 * u); }
- if (cun) lab += cun.path ? plCunPath(cun.path, cun.t, u, P) : plCun(cun.a, cun.b, cun.t, u, cr, P);
+ if (cun) lab += cun.path ? plCunPath(cun.path, cun.t, u, P) : plCun(cun.a, cun.b, cun.t, u, cr, P, lms.map(l => l.xy));
  const fs = 12.5 * u;
  // au plus 3 étiquettes par planche : cun, puis les repères dans l'ordre, puis le code ;
  // un repère sans place libre est masqué (avec son marqueur) plutôt que de chevaucher
  let budget = 3 - (cun ? 1 : 0);
- for (const l of lms){
-  if (budget <= 0) break;
-  const tw = plTW(l.t, fs) + 14 * u, th = fs + 9 * u;
-  const r = P.place(l.xy[0], l.xy[1], tw, th, 8 * u, null, {hide:true});
-  if (!r) continue;
-  budget--;
-  g += `<circle class="pl-lm" cx="${plN(l.xy[0])}" cy="${plN(l.xy[1])}" r="${plN(3.6 * u)}"/>`;
-  if (r.lead){ const ex = plClamp(l.xy[0], r[0], r[0] + r[2]), ey = plClamp(l.xy[1], r[1], r[1] + r[3]); lab += `<path class="pl-lead" d="M${plN(l.xy[0])} ${plN(l.xy[1])}L${plN(ex)} ${plN(ey)}"/>`; }
-  lab += plPill(r, l.t, fs, "pl-lbl");
- }
+ // v34c-3 : tous les repères (au plus 3) sont étiquetés ; le badge du code seulement s'il reste de la place
+ // v34c-4 (relecture 4, M9) : le badge du code est posé AVANT les repères, tout près de son point (trait de 50 px CSS au
+ // plus) ; s'il n'y a pas de place proche, il est omis (le titre de la fiche porte le code) plutôt que posé sur un doigt
  const pm = act === "mir" ? P1 : P0, po = act === "mir" ? P0 : P1;
- if (po) g += plDot(po[0], po[1], u * (act === "both" ? 1 : .85), act === "both" ? "is-mir" : "is-ghost", false);
- EX.forEach(q => { g += plDot(q[0], q[1], u, "", false); });
- g += plDot(pm[0], pm[1], u, "", true);
- if (ctx === "sheet" && budget > 0){
-  const t = code(p), cfs = 12 * u, r = P.place(pm[0], pm[1], plTW(t, cfs, true) + 14 * u, cfs + 10 * u, 14 * u, ["tr", "tl", "br", "bl", "r", "l", "t", "b"], {hide:true});
+ if (ctx === "sheet"){
+  const t = code(p), cfs = 12 * u, r = P.place(pm[0], pm[1], plTW(t, cfs, true) + 14 * u, cfs + 10 * u, 14 * u, ["tr", "tl", "br", "bl", "r", "l", "t", "b"], {hide:true, tryOnly:true, maxGap: 50 * u, near: [po, ...EX, ...lms.map(q => q.xy)].filter(Boolean)});
   if (r){
    if (r.lead) lab += `<path class="pl-lead pl-lead-pt" d="M${plN(pm[0])} ${plN(pm[1])}L${plN(plClamp(pm[0], r[0], r[0] + r[2]))} ${plN(plClamp(pm[1], r[1], r[1] + r[3]))}"/>`;
    lab += plPill(r, t, cfs, "pl-code");
   }
  }
+ const anchors = [P0, P1, ...EX].filter(Boolean);
+ for (const l of lms){
+  const tw = plTW(l.t, fs) + 14 * u, th = fs + 9 * u;
+  // côté extérieur d'abord (par rapport aux autres repères) : les étiquettes de repères voisins ne s'échangent pas
+  let ord = null;
+  if (lms.length > 1){ const mx = lms.reduce((a, q) => a + q.xy[0], 0) / lms.length;
+   ord = l.xy[0] < mx - 1e-6 ? ["l", "tl", "bl", "t", "b", "r", "tr", "br"] : l.xy[0] > mx + 1e-6 ? ["r", "tr", "br", "t", "b", "l", "tl", "bl"] : null; }
+  const others = anchors.concat(lms.filter(q => q !== l).map(q => q.xy)).filter(q => Math.hypot(q[0] - l.xy[0], q[1] - l.xy[1]) > 6 * u && q !== P0);
+  // côté : par rapport au point, ou, pour un groupe de repères (deux tendons, etc.), par rapport au milieu du groupe
+  // (v34c-4, relecture 4, M10 : PC6 f, grand palmaire du côté radial, long palmaire du côté cubital)
+  let sx = P0[0], sd = Math.abs(l.xy[0] - P0[0]) > 20 * u ? Math.sign(l.xy[0] - P0[0]) : 0;
+  if (lms.length > 1){ const mx2 = lms.reduce((a, q) => a + q.xy[0], 0) / lms.length;
+   // v34c-5 (relecture 5, M4) : si les repères sont de part et d'autre du point, la référence est le point lui-même
+   const opp = lms.some(q => q !== l && Math.sign(q.xy[0] - P0[0]) * Math.sign(l.xy[0] - P0[0]) < 0);
+   if (opp && Math.abs(l.xy[0] - P0[0]) > 1.5 * u){ sx = P0[0]; sd = Math.sign(l.xy[0] - P0[0]); }
+   else if (Math.abs(l.xy[0] - mx2) > 1.5 * u){ sx = mx2; sd = Math.sign(l.xy[0] - mx2); } }
+  const r = P.place(l.xy[0], l.xy[1], tw, th, 8 * u, ord, {hide:true, near: others, side: [sx, sd]});
+  if (!r) continue;
+  budget--;
+  if (!l.onPt) g += `<circle class="pl-lm" cx="${plN(l.xy[0])}" cy="${plN(l.xy[1])}" r="${plN(3.6 * u)}"/>`;
+  if (r.lead){ const ex = plClamp(l.xy[0], r[0], r[0] + r[2]), ey = plClamp(l.xy[1], r[1], r[1] + r[3]); lab += `<path class="pl-lead" d="M${plN(l.xy[0])} ${plN(l.xy[1])}L${plN(ex)} ${plN(ey)}"/>`; }
+  lab += plPill(r, l.t, fs, "pl-lbl");
+ }
+ lab += P.flush();   // v34c-3 : pastille de la règle après les repères
+ if (po) g += plDot(po[0], po[1], u * (act === "both" ? 1 : .85), act === "both" ? "is-mir" : "is-ghost", false);
+ EX.forEach(q => { g += plDot(q[0], q[1], u, "", false); });
+ g += plDot(pm[0], pm[1], u, "", true);
  const cap = plOrient(V, flip);
  const svg = `<svg class="pl-ov" viewBox="${cr.map(plN).join(" ")}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${g}${lab}</svg>`;
  const loc = plLocWrap(plLocSVG(V, flip), p.id, o.tapLoc);
@@ -3241,35 +3411,73 @@ function bodyFigHTML(p){
  const M = plMain(p), w = Math.min(600, innerWidth) - 32;
  if (M){
   const e = M.e, k = M.V.k;
-  // vue « also » au champ le plus large, sinon la silhouette de repérage
-  let best = null;
-  for (const vid of Object.keys(e.also || {})){
-   const V = plView(vid, k); if (!V || V.k !== k) continue;
-   const c = plIn(p, vid, k); if (!c) continue;
-   const field = V.s.w * V.s.h / (V.cun * V.cun);
-   if (!best || field > best.field) best = {V, c, field};
-  }
-  if (best){
-   const V = best.V, pts = [best.c.xy].concat(best.c.mir ? [best.c.mir] : []);
-   const asp = plClamp(V.s.w / V.s.h, .55, 1.2);
-   const cr = [0, 0, V.s.w, V.s.h];
-   const u = cr[2] / w;
+  // v34c-5 (relecture 5, M6) : un point de la plante n'est pas visible sur une silhouette de face ou de dos ; la vue
+  // « sur le corps » montre la plante entière, et dit que le point est sous les deux pieds quand il est bilatéral
+  if (/^plant/.test(norm(M.V.v.face || "")) || M.e.view === "foot_sole"){
+   const V = M.V, cr = [0, 0, V.s.w, V.s.h], bi = bilateral(p), u = cr[2] / (bi ? w / 2 : w);
+   const one = (flip, lab) => {
+    const msegs = plMerSegs(V, p.m, flip);
+    let g = plMerSVG(msegs, u, cr, null, {});
+    g += plDot(flip ? V.s.w - M.xy[0] : M.xy[0], M.xy[1], u, "", true);
+    // v34c-7 (relecture 7, mineur 3) : l'étiquette « côté gauche / droit » est AU-DESSUS de la figure (elle couvrait les points du pied)
+    const pl_ = `<div class="plate pl-body${bi ? " pl-body-half" : ""}" style="aspect-ratio:${plN(cr[2])} / ${plN(cr[3])}">${plImgs(V, cr, flip, true)}<svg class="pl-ov" viewBox="${cr.map(plN).join(" ")}" aria-hidden="true">${g}</svg></div>`;
+    return lab ? `<div class="pl-body-col"><span class="pl-body-lab">${lab}</span>${pl_}</div>` : pl_;
+   };
    const msegs = plMerSegs(V, p.m, false);
-   let g = plMerSVG(msegs, u, cr, null, {});
-   g += best.c.mir ? plDot(best.c.mir[0], best.c.mir[1], u, "is-mir", false) : "";
-   g += plDot(best.c.xy[0], best.c.xy[1], u, "", true);
-   return {html: `<div class="plate pl-body" role="img" aria-label="${plEsc(code(p) + " : " + plOrient(V, false))}" style="aspect-ratio:${plN(cr[2])} / ${plN(cr[3])}">${plImgs(V, cr, false, true)}<svg class="pl-ov" viewBox="${cr.map(plN).join(" ")}" aria-hidden="true">${g}</svg></div>`, cap: plOrient(V, false), mer: msegs.length ? plMerCap(p.m) : ""};
+   // plantes vues de face, pieds vers soi (comme la planche) : pied droit à gauche, pied gauche à droite, gros orteils vers le
+   // milieu ; le même point sur chaque plante
+   const cap = bi ? "Plantes des pieds · le point sous chaque pied" : plOrient(V, false);
+   const html = bi ? `<div class="pl-body2" role="img" aria-label="${plEsc(code(p) + " : " + cap)}">${one(true, "pied droit")}${one(false, "pied gauche")}</div>`
+                   : one(false, "").replace('class="plate pl-body"', `class="plate pl-body" role="img" aria-label="${plEsc(code(p) + " : " + cap)}"`);
+   return {html, cap, mer: msegs.length ? plMerCap(p.m) : ""};
   }
-  // silhouette de repérage agrandie, point reporté depuis la vue détaillée
-  const lv = M.V.v.loc, lf = PL.man.loc_files && (PL.man.loc_files[k] || PL.man.loc_files.m);
-  const sz = lv && PL.loc[(PL.man.loc_files[k] ? k : "m") + lv.which], r = lv && (lv[k] || lv.m);
-  if (lv && lf && lf[lv.which] && sz && Array.isArray(r) && r.length >= 4){
-   const map = q => [r[0] + q[0] / M.V.s.w * r[2], r[1] + q[1] / M.V.s.h * r[3]];
-   const u = sz.w / Math.min(w, 260 * sz.w / sz.h);
-   let g = `<rect class="loc-r" x="${plN(r[0])}" y="${plN(r[1])}" width="${plN(r[2])}" height="${plN(r[3])}" rx="${plN(sz.h * .01)}"/>`;
-   if (M.mir){ const q = map(M.mir); g += plDot(q[0], q[1], u * .6, "is-mir", false); }
-   const q = map(M.xy); g += plDot(q[0], q[1], u * .6, "", true);
-   return {html: `<div class="loc-big"><svg viewBox="0 0 ${sz.w} ${sz.h}" role="img" aria-label="Silhouette, zone du point"><image href="${PL_DIR}${plEsc(lf[lv.which])}" width="${sz.w}" height="${sz.h}"/>${g}</svg></div>`, cap: plOrient(M.V, false)};
+  // v34c-6 (relecture 6, M1) : la figure « sur le corps » vient d'une PROJECTION du point 3D dans une caméra corps entier
+  // (manifeste : e.body, calculé par finalize) ; jamais une planche détaillée reportée sur une silhouette vue d'ailleurs.
+  // VG 20 / SISHENCONG : la planche du sommet de la tête, avec tous les points du groupe. Sans figure possible : la planche
+  // du point elle-même, cadrée large.
+  // légende d'une figure doublée (gauche + miroir) : sans « gauche » dans le nom de la région
+  const capTwo = c => c.replace(/flanc gauche/g, "de profil").replace(/\s+gauches?\b/g, "") + " · côté gauche et côté droit";
+  const fig = (V, dots, cap, crop, two, labs) => {
+   const cr0 = crop || [0, 0, V.s.w, V.s.h], W = V.s.w;
+   // two : point des deux côtés sur une figure qui n'en montre qu'un (profil, face interne…) → la même figure en miroir
+   // pour l'autre côté, un point sur chacune (comme les deux plantes)
+   const one = (flip, lab) => {
+    const cr = flip ? [W - cr0[0] - cr0[2], cr0[1], cr0[2], cr0[3]] : cr0, u = cr[2] / (two ? w / 2 : w);
+    const msegs = plMerSegs(V, p.m, flip);
+    let g = plMerSVG(msegs, u, cr, null, {});
+    dots.forEach(d => { g += plDot(flip ? W - d[0] : d[0], d[1], u, d[2] || "", !d[2]); });
+    // v34c-7 (relecture 7, mineur 3) : l'étiquette « côté gauche / droit » est AU-DESSUS de la figure (elle couvrait les points du pied)
+    const pl_ = `<div class="plate pl-body${two ? " pl-body-half" : ""}" style="aspect-ratio:${plN(cr[2])} / ${plN(cr[3])}">${plImgs(V, cr, flip, true)}<svg class="pl-ov" viewBox="${cr.map(plN).join(" ")}" aria-hidden="true">${g}</svg></div>`;
+    return lab ? `<div class="pl-body-col"><span class="pl-body-lab">${lab}</span>${pl_}</div>` : pl_;
+   };
+   const msegs = plMerSegs(V, p.m, false), mer = msegs.length ? plMerCap(p.m) : "";
+   const L_ = labs || ["côté gauche", "côté droit"];
+   if (two) return {html: `<div class="pl-body2" role="img" aria-label="${plEsc(code(p) + " : " + cap)}">${one(false, L_[0])}${one(true, L_[1])}</div>`, cap, mer};
+   return {html: one(false, "").replace('class="plate pl-body"', `class="plate pl-body" role="img" aria-label="${plEsc(code(p) + " : " + cap)}"`), cap, mer};
+  };
+  const b = e.body;
+  if (b && b.own){
+   const V = M.V, ex = plExtraIn(p, V.vid, k);
+   return fig(V, [...ex.map(q => [q[0], q[1], ""]), [M.xy[0], M.xy[1]]], plOrient(V, false) + (ex.length ? ` · les ${ex.length + 1} points` : ""));
+  }
+  if (b && b.v && Array.isArray(b[k])){
+   const V = plView(b.v, k);
+   if (V){
+    const mir = b.mirror && b.mirror[k];
+    const dots = (mir ? [[mir[0], mir[1], "is-mir"]] : []).concat([[b[k][0], b[k][1]]]);
+    const two = bilateral(p) && !mir;
+    // figure de profil : la vue gauche et son miroir (côté droit) ; un point vu sur la jambe droite (face interne) : idem
+    const cap = two ? capTwo(plOrient(V, false)) : plOrient(V, false);
+    if (two && b.side === "r") return fig(V, dots, cap, null, true, ["côté droit", "côté gauche"]);
+    return fig(V, dots, cap, null, two);
+   }
+  }
+  {
+   const V = M.V, pts = [M.xy].concat(M.mir ? [M.mir] : []);
+   const asp = plClamp(V.s.w / V.s.h, .7, 1.3);
+   const cr = plCrop(V, pts, {aspect: asp, pad: 3, minCun: 10, minFrac: .7, keep: M.xy});
+   const two = bilateral(p) && !M.mir;
+   return fig(V, (M.mir ? [[M.mir[0], M.mir[1], "is-mir"]] : []).concat([[M.xy[0], M.xy[1]]]), two ? capTwo(plOrient(V, false)) : plOrient(V, false), cr, two);
   }
  }
  // ancien schéma, corps entier
@@ -4341,6 +4549,41 @@ const code = p => p.m === "EX" ? p.fr : (p.code ? p.code.split(" · ")[0] : `${M
 const who = p => p.m === "EX" ? p.code : (p.code ? p.code.split(" · ").slice(1).join(" · ") || p.id : `${p.m}${p.n}`);
 const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 const bilateral = p => p.bi !== false && p.m !== "GV" && p.m !== "CV";
+
+// v34c-5 (relecture 5, mineur 18) : sans réseau, la police d'icônes Material Symbols (chargée depuis Google Fonts) ne se
+// charge pas et les noms des icônes s'affichaient en toutes lettres (« arr », « clo »…). Si la police n'est pas disponible
+// après 2,5 s, chaque icône est remplacée par un symbole Unicode équivalent (ou masquée).
+const MSI_FALLBACK = {arrow_back:"←", arrow_back_ios_new:"‹", arrow_forward:"→", arrow_upward:"↑", arrow_downward:"↓", close:"✕", check:"✓",
+ check_circle:"✓", chevron_right:"›", expand_less:"˄", expand_more:"˅", keyboard_arrow_down:"˅", keyboard_arrow_up:"˄", add:"+", remove:"−",
+ play_arrow:"▶", pause:"❚❚", stop:"■", replay:"↻", skip_next:"⏭", skip_previous:"⏮", first_page:"⇤", search:"⌕", zoom_in:"⊕", star:"★",
+ favorite:"♥", dark_mode:"☾", light_mode:"☀", brightness_auto:"◐", nights_stay:"☾", bedtime:"☾", info:"ⓘ", warning:"⚠", history:"↺",
+ schedule:"◷", timer:"◷", watch:"◷", notifications:"♪", volume_up:"♪", volume_down:"♪", volume_off:"∅", person:"☺", face:"☺", female:"♀",
+ water_drop:"●", water:"≈", waves:"≈", air:"≋", ac_unit:"❄", rainy:"☂", thunderstorm:"ϟ", bolt:"ϟ", local_fire_department:"♨", forest:"♣",
+ spa:"❀", healing:"✚", stethoscope:"✚", sick:"✚", menu_book:"▤", format_list_numbered:"☰", tag:"#", straighten:"⇔", height:"⇕",
+ radio_button_unchecked:"○", adjust:"◎", touch_app:"☝", back_hand:"✋", lightbulb:"✦", psychology:"✦", self_improvement:"✦",
+ graphic_eq:"♫", piano:"♫", stylus:"✎", conversion_path:"⇢", skeleton:"☖", accessibility_new:"☺", ecg_heart:"♥", pulmonology:"✚",
+ gastroenterology:"✚", dermatology:"✚", sports_tennis:"●"};
+function msiFallback(root){
+ (root || document).querySelectorAll(".msi:not([data-sym])").forEach(e => { const n = e.textContent.trim(); e.setAttribute("data-sym", MSI_FALLBACK[n] || ""); });
+}
+// v34c-6 (relecture 6, mineur 13) : les symboles de secours s'affichent TOUT DE SUITE (plus de mots pendant 2,5 s hors ligne) ;
+// la police d'icônes les remplace dès qu'elle est réellement chargée (ligature « arrow_back » d'un seul glyphe)
+(function msiCheck(){
+ const root = document.documentElement;
+ root.classList.add("no-msi"); msiFallback();
+ const mo = new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => n.nodeType === 1 && msiFallback(n.parentNode || n))));
+ mo.observe(document.body || root, {childList:true, subtree:true});
+ const ligOK = () => { try {
+  const sp = document.createElement("span"); sp.className = "msi"; sp.textContent = "arrow_back";
+  sp.style.cssText = "position:absolute;visibility:hidden;max-width:none;font-size:24px!important;font-family:'Material Symbols Outlined'";
+  document.body.appendChild(sp); const w_ = sp.getBoundingClientRect().width; sp.remove(); return w_ > 0 && w_ <= 48;
+ } catch(e){ return false; } };
+ const on = () => { if (ligOK()){ root.classList.remove("no-msi"); mo.disconnect(); return true; } return false; };
+ if (document.fonts && document.fonts.load){
+  document.fonts.load("24px 'Material Symbols Outlined'", "arrow_back").then(() => { if (!on()) setTimeout(on, 1500); }).catch(() => {});
+  if (document.fonts.ready) document.fonts.ready.then(on).catch(() => {});
+ }
+})();
 const NSYM = SYMPTOMS.reduce((a,c) => a + c.items.length, 0);
 
 // Pictogrammes : Google Material Symbols (police), sans retouche.
@@ -4773,7 +5016,7 @@ function screenProfil(){
   ${PL.man && PL.man.credit ? `<p><b>Illustrations.</b> ${plEsc(PL.man.credit)}</p>` : ""}
   <p><b>Sons.</b> Enregistrements libres de droits, adaptés pour boucler sans coupure. Pluie : <a href="https://freesound.org/people/alex36917/sounds/524605/" target="_blank" rel="noopener">alex36917</a> ; vagues : <a href="https://freesound.org/people/Luftrum/sounds/48412/" target="_blank" rel="noopener">Luftrum</a> (Freesound, licence CC BY) ; oiseaux : kvgarlic ; ruisseau : gluckose (CC0), via l'application Blanket. Forêt, feu de bois, grillons, carillon, tonnerre, chouette et bol chantant : via l'application Moodist (CC0 ou licence Pixabay). Le piano, la nappe et les bruits sont fabriqués par l'app.</p>
  </div></div>
- <p class="fine">Version 33.1.</p>`;
+ <p class="fine">Version 34.</p>`;
 }
 
 // ── Premier lancement : choix de la silhouette ───────────────
@@ -4876,7 +5119,7 @@ function pointHTML(p, W){
   <div class="ptitle"><h1>${p.py}</h1><span class="han" lang="zh">${p.hz}</span></div>
   <p class="ptr">${p.tr}</p>`}
   ${pregBanner}
-  <figure class="card figcard pfig">${F.html}<figcaption class="pl-cap"><b>${F.cap}</b><span>${sidesTxt(p)}</span>${merCap(F.mer)}</figcaption></figure>
+  <figure class="card figcard pfig">${F.html}<figcaption class="pl-cap"><b>${F.cap}</b><span>${sidesTxt(p)}</span>${merCap(F.mer)}</figcaption>${(() => { const e_ = typeof plEntry === "function" ? plEntry(p) : null; return e_ && e_.note ? `<p class="pl-note">${e_.note}</p>` : ""; })()}</figure>
   <div class="howto"><h2>Pour le trouver</h2>${repSteps(p.rep)}
    <details class="more"><summary>Description précise (norme OMS)</summary><p>${p.loc}</p></details></div>
   <section class="sec"><h2>Fonctions <small class="h2-note">selon la tradition</small></h2><ul class="fn">${p.fn.map(f => `<li>${f}</li>`).join("")}</ul></section>
@@ -4970,7 +5213,7 @@ function openBody(id){
  push(`<div class="body-x-wrap"><button class="body-x" data-act="back" aria-label="Fermer et revenir au point ${code(p)}">${msi("close")}</button></div>${bar(code(p) + " · sur le corps")}
  <article class="detail">
   <h1 class="h1d">Où se trouve ${code(p)}</h1>
-  <p class="sub">${p.py} · ${sidesTxt(p).toLowerCase()}</p>
+  <p class="sub">${p.py} · ${(t_ => t_.charAt(0).toLowerCase() + t_.slice(1))(sidesTxt(p))}</p>
   <figure class="card figcard pfig">${F.html}<figcaption class="pl-cap"><b>${F.cap}</b>${merCap(F.mer)}</figcaption></figure>
   <div class="howto"><h2>Pour le trouver</h2>${repSteps(p.rep)}</div>
  </article>`);
