@@ -1352,6 +1352,12 @@ html{touch-action:manipulation}
 .pl-body2 .plate.pl-body-half{position:relative}
 .pl-body-lab{display:block;text-align:center;font-size:12px;line-height:1.3;color:var(--muted)}
 
+.solo{margin-top:12px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--brand) 8%,transparent)}
+.solo h3{display:flex;align-items:center;gap:6px;margin:0 0 4px;font-size:15px}
+.solo h3 .msi{font-size:20px}
+.solo p{margin:0}
+.sg-solo{margin-top:6px}
+
 </style>
 </head>
 <body>
@@ -1702,7 +1708,7 @@ const POINTS = [
  fn:["Aide la vue","Détend et calme la douleur : cou, épaule, poignet"],
  fnt:["Bénéficie aux yeux","Détend les tendons et soulage la douleur"],
  ind:"Nuque et épaules bloquées, douleur du poignet, vue trouble."},
-{id:"SI11",m:"SI",n:11,py:"Tiānzōng",hz:"天宗",tr:"Ancêtre céleste",v:"back",x:142,y:240,reg:"dos",
+{id:"SI11",solo:"Posez une balle de tennis entre votre omoplate et un mur, au milieu de l'omoplate. Bougez doucement jusqu'à sentir le point sensible, puis appuyez le dos contre la balle.",m:"SI",n:11,py:"Tiānzōng",hz:"天宗",tr:"Ancêtre céleste",v:"back",x:142,y:240,reg:"dos",
  cat:[],
  loc:"Sur l'omoplate. Tracez une ligne du milieu de l'arête de l'omoplate (en haut) jusqu'à sa pointe (en bas) : le point est au premier tiers de cette ligne, dans un creux.",
  rep:"Sur l'omoplate, tracez une ligne du milieu de son arête (en haut) jusqu'à sa pointe (en bas). Le point est au premier tiers de cette ligne, dans un creux souvent très sensible. C'est plus facile si quelqu'un d'autre presse pour vous.",
@@ -1739,49 +1745,49 @@ const POINTS = [
  fn:["Soulage la nuque","Dégage la tête et repose les yeux","Aide au début d'un rhume ou d'un coup de froid"],
  fnt:["Élimine le Vent","Clarifie la tête et les yeux","Bénéficie à la nuque"],
  ind:"Maux de tête à l'arrière du crâne, nuque raide, yeux fatigués."},
-{id:"BL13",m:"BL",n:13,py:"Fèishù",hz:"肺俞",tr:"Assentiment du Poumon",v:"back",x:180,y:234,reg:"dos",
+{id:"BL13",solo:"Mettez deux balles de tennis dans une chaussette, nouée entre les deux. Allongé sur le dos, genoux pliés, placez la colonne entre les balles, entre les omoplates, à la hauteur du haut de leur bord intérieur. Laissez le poids du corps appuyer. Debout contre un mur, c'est plus doux.",m:"BL",n:13,py:"Fèishù",hz:"肺俞",tr:"Assentiment du Poumon",v:"back",x:180,y:234,reg:"dos",
  cat:["Shu du dos du Poumon"],
  loc:"Dans le dos, à 1,5 cun (2 doigts joints) de la colonne, à la hauteur du bas de la 3e vertèbre du dos (T3).",
  rep:"Penchez la tête en avant : la vertèbre qui dépasse le plus à la base du cou s'appelle C7. Descendez de trois vertèbres. Le point est à deux doigts de la colonne, de chaque côté.",
  fn:["Renforce le souffle","Calme la toux et aide à respirer","Aide le corps à se défendre contre un rhume"],
  fnt:["Tonifie le Qi du Poumon","Fait descendre et disperse le Qi du Poumon","Libère l'extérieur"],
  ind:"Toux, asthme, rhume, essoufflement."},
-{id:"BL15",m:"BL",n:15,py:"Xīnshù",hz:"心俞",tr:"Assentiment du Cœur",v:"back",x:180,y:266,reg:"dos",
+{id:"BL15",solo:"Mettez deux balles de tennis dans une chaussette, nouée entre les deux. Allongé sur le dos, genoux pliés, placez la colonne entre les balles, au milieu de la hauteur des omoplates. Laissez le poids du corps appuyer. Debout contre un mur, c'est plus doux.",m:"BL",n:15,py:"Xīnshù",hz:"心俞",tr:"Assentiment du Cœur",v:"back",x:180,y:266,reg:"dos",
  cat:["Shu du dos du Cœur"],
  loc:"Dans le dos, à 1,5 cun (2 doigts joints) de la colonne, à la hauteur du bas de la 5e vertèbre du dos (T5).",
  rep:"Partez de C7, la vertèbre qui dépasse à la base du cou. Descendez de cinq vertèbres. Le point est à deux doigts de la colonne, de chaque côté.",
  fn:["Apaise l'esprit et l'anxiété","Calme les palpitations","Calme l'agitation (la tradition parle de « Feu du Cœur »)"],
  fnt:["Calme l'esprit","Tonifie et nourrit le Cœur","Clarifie le Feu du Cœur"],
  ind:"Anxiété, palpitations, insomnie."},
-{id:"BL17",m:"BL",n:17,py:"Géshù",hz:"膈俞",tr:"Assentiment du diaphragme",v:"back",x:180,y:298,reg:"dos",
+{id:"BL17",solo:"Mettez deux balles de tennis dans une chaussette, nouée entre les deux. Allongé sur le dos, genoux pliés, placez la colonne entre les balles, à la hauteur de la pointe du bas des omoplates. Laissez le poids du corps appuyer. Debout contre un mur, c'est plus doux.",m:"BL",n:17,py:"Géshù",hz:"膈俞",tr:"Assentiment du diaphragme",v:"back",x:180,y:298,reg:"dos",
  cat:["Hui du Sang","Shu du dos du diaphragme"],
  loc:"Dans le dos, à 1,5 cun (2 doigts joints) de la colonne, à la hauteur du bas de la 7e vertèbre du dos (T7).",
  rep:"Bras le long du corps, la pointe du bas des omoplates est à la hauteur de la 7e vertèbre du dos. Le point est à deux doigts de la colonne, de chaque côté.",
  fn:["Calme le hoquet en détendant le diaphragme","Aide en cas de fatigue avec pâleur (la tradition dit « nourrit le Sang »)","Soulage les douleurs toujours au même endroit (la tradition dit « fait circuler le Sang »)"],
  fnt:["Nourrit et fait circuler le Sang","Fait descendre le Qi et ouvre le diaphragme"],
  ind:"Hoquet, fatigue avec pâleur, douleurs toujours au même endroit, problèmes de peau."},
-{id:"BL18",m:"BL",n:18,py:"Gānshù",hz:"肝俞",tr:"Assentiment du Foie",v:"back",x:180,y:330,reg:"dos",
+{id:"BL18",solo:"Deux balles de tennis dans une chaussette, nouée entre les deux. Allongé sur le dos, genoux pliés, placez la colonne entre les balles, un peu sous la pointe des omoplates. Laissez le poids du corps appuyer, ou appuyez-vous contre un mur.",m:"BL",n:18,py:"Gānshù",hz:"肝俞",tr:"Assentiment du Foie",v:"back",x:180,y:330,reg:"dos",
  cat:["Shu du dos du Foie"],
  loc:"Dans le dos, à 1,5 cun (2 doigts joints) de la colonne, à la hauteur du bas de la 9e vertèbre du dos (T9).",
  rep:"Repérez la pointe du bas des omoplates. Descendez de deux vertèbres. Le point est à deux doigts de la colonne, de chaque côté.",
  fn:["Calme le stress et l'irritabilité (la tradition dit « fait circuler l'énergie du Foie »)","Repose les yeux"],
  fnt:["Fait circuler le Qi du Foie","Nourrit le Sang du Foie","Bénéficie aux yeux"],
  ind:"Irritabilité, douleur sous les côtes, yeux secs ou fatigués."},
-{id:"BL20",m:"BL",n:20,py:"Píshù",hz:"脾俞",tr:"Assentiment de la Rate",v:"back",x:180,y:362,reg:"dos",
+{id:"BL20",solo:"Debout, mains sur la taille, glissez les pouces dans le dos et remontez-les le long de la colonne, à deux doigts d'elle, jusqu'au bas des côtes. Si vous n'y arrivez pas, allongez-vous sur deux balles de tennis nouées dans une chaussette, la colonne entre les deux.",m:"BL",n:20,py:"Píshù",hz:"脾俞",tr:"Assentiment de la Rate",v:"back",x:180,y:362,reg:"dos",
  cat:["Shu du dos de la Rate"],
  loc:"Dans le dos, à 1,5 cun (2 doigts joints) de la colonne, à la hauteur du bas de la 11e vertèbre du dos (T11).",
  rep:"Repérez la pointe du bas des omoplates. Descendez de quatre vertèbres. Le point est à deux doigts de la colonne, de chaque côté.",
  fn:["Renforce la digestion","Réduit la lourdeur et les ballonnements","Aide en cas de fatigue avec pâleur"],
  fnt:["Tonifie la Rate et l'Estomac","Résout l'Humidité","Nourrit le Sang"],
  ind:"Fatigue, digestion lente, selles molles, manque d'appétit."},
-{id:"BL21",m:"BL",n:21,py:"Wèishù",hz:"胃俞",tr:"Assentiment de l'Estomac",v:"back",x:180,y:378,reg:"dos",
+{id:"BL21",solo:"Debout, mains sur la taille, glissez les pouces dans le dos et remontez-les le long de la colonne, à deux doigts d'elle, jusqu'au bas des côtes. Si vous n'y arrivez pas, allongez-vous sur deux balles de tennis nouées dans une chaussette, la colonne entre les deux.",m:"BL",n:21,py:"Wèishù",hz:"胃俞",tr:"Assentiment de l'Estomac",v:"back",x:180,y:378,reg:"dos",
  cat:["Shu du dos de l'Estomac"],
  loc:"Dans le dos, à 1,5 cun (2 doigts joints) de la colonne, à la hauteur du bas de la 12e vertèbre du dos (T12).",
  rep:"Une vertèbre sous V 20, à deux doigts de la colonne, de chaque côté.",
  fn:["Apaise l'estomac : nausées, douleurs","Renforce l'estomac"],
  fnt:["Harmonise l'Estomac et fait descendre le Qi","Tonifie l'Estomac"],
  ind:"Douleurs d'estomac, nausées, manque d'appétit."},
-{id:"BL23",m:"BL",n:23,py:"Shènshù",hz:"肾俞",tr:"Assentiment des Reins",v:"back",x:180,y:411,reg:"dos",preg:"prud",
+{id:"BL23",solo:"Facile seul : mains sur la taille, pouces dans le dos, à deux doigts de la colonne, un peu au-dessus de la ligne des hanches. Pressez avec les pouces, ou avec les jointures des poings fermés.",m:"BL",n:23,py:"Shènshù",hz:"肾俞",tr:"Assentiment des Reins",v:"back",x:180,y:411,reg:"dos",preg:"prud",
  cat:["Shu du dos des Reins"],
  loc:"Dans le bas du dos, à 1,5 cun (2 doigts joints) de la colonne, à la hauteur du bas de la 2e vertèbre lombaire (L2).",
  rep:"Posez les mains sur le haut des os des hanches : la ligne qui les relie passe par la 4e vertèbre du bas du dos. Remontez de deux vertèbres (la 2e vertèbre lombaire). À la hauteur du bas de cette vertèbre, le point est à deux doigts de la colonne, de chaque côté.",
@@ -1789,7 +1795,7 @@ const POINTS = [
  fnt:["Tonifie les Reins","Renforce le bas du dos","Bénéficie aux os et aux oreilles"],
  ind:"Mal de dos qui dure, fatigue, acouphènes (sifflements d'oreille), envies fréquentes d'uriner.",
  warn:"Pendant la grossesse, ne pressez pas fort sur le bas du dos."},
-{id:"BL25",m:"BL",n:25,py:"Dàchángshù",hz:"大肠俞",tr:"Assentiment du Gros Intestin",v:"back",x:180,y:443,reg:"dos",preg:"prud",
+{id:"BL25",solo:"Facile seul : mains sur les hanches, pouces dans le dos, sur la ligne qui relie le haut des hanches, à deux doigts de la colonne. Pressez avec les pouces, ou avec les jointures des poings fermés.",m:"BL",n:25,py:"Dàchángshù",hz:"大肠俞",tr:"Assentiment du Gros Intestin",v:"back",x:180,y:443,reg:"dos",preg:"prud",
  cat:["Shu du dos du Gros Intestin"],
  loc:"Dans le bas du dos, à 1,5 cun (2 doigts joints) de la colonne, à la hauteur du bas de la 4e vertèbre lombaire (L4).",
  rep:"Posez les mains sur le haut des os des hanches. La ligne qui les relie croise la colonne à la 4e vertèbre du bas du dos. Le point est à deux doigts de la colonne, de chaque côté.",
@@ -1979,7 +1985,7 @@ const POINTS = [
  fnt:["Fait descendre le Qi","Détend les tendons","Favorise la lactation"],
  ind:"Tensions des épaules et de la nuque.",
  warn:"À éviter pendant la grossesse."},
-{id:"GB30",m:"GB",n:30,py:"Huántiào",hz:"环跳",tr:"Saut en cercle",v:"back",x:139,y:483,reg:"jambe",
+{id:"GB30",solo:"Allongez-vous sur le dos et glissez une balle de tennis sous la fesse, dans le creux derrière la bosse de la hanche. Laissez le poids du corps appuyer. Debout, pressez avec la jointure du pouce.",m:"GB",n:30,py:"Huántiào",hz:"环跳",tr:"Saut en cercle",v:"back",x:139,y:483,reg:"jambe",
  cat:["Croisement avec la Vessie","Étoile céleste"],
  loc:"Sur la fesse. Tracez une ligne entre la bosse osseuse de la hanche (grand trochanter) et le bas du sacrum (l'os plat en bas de la colonne) : le point est au premier tiers de cette ligne, côté hanche.",
  rep:"Couchez-vous sur le côté, la jambe du dessus pliée. Repérez la bosse de l'os de la hanche et le bas du sacrum (l'os plat en bas du dos). Le point est au premier tiers de la ligne qui les relie, côté hanche. Il est profond : pressez avec le coude ou le poing.",
@@ -2059,7 +2065,7 @@ const POINTS = [
  fnt:["Fait circuler le Qi du Foie","Harmonise le Foie et l'Estomac"],
  ind:"Douleur et tension des côtes, renvois, seins tendus."},
 // ── Vaisseau Gouverneur ──
-{id:"GV4",m:"GV",n:4,py:"Mìngmén",hz:"命门",tr:"Porte de la vie",v:"back",x:200,y:411,reg:"dos",preg:"prud",
+{id:"GV4",solo:"Fermez le poing et posez la jointure du majeur dans le creux entre les vertèbres, ou pressez du bout du majeur. Évitez la balle : sur la ligne du milieu, elle appuierait sur l'os.",m:"GV",n:4,py:"Mìngmén",hz:"命门",tr:"Porte de la vie",v:"back",x:200,y:411,reg:"dos",preg:"prud",
  cat:[],
  loc:"Dans le bas du dos, sur la colonne, dans le creux sous la 2e vertèbre lombaire (L2), souvent un peu au-dessus de la hauteur du nombril.",
  rep:"Repérez la ligne qui relie le haut des deux os des hanches : elle passe par la 4e vertèbre du bas du dos. Remontez de deux vertèbres sur la colonne : le point est dans le creux juste sous la 2e vertèbre.",
@@ -2067,7 +2073,7 @@ const POINTS = [
  fnt:["Tonifie le Yang des Reins","Renforce le bas du dos","Réchauffe le Feu de Ming Men"],
  ind:"Mal de dos qui empire avec le froid, frilosité, fatigue.",
  warn:"Pendant la grossesse, ne pressez pas fort sur le bas du dos."},
-{id:"GV14",m:"GV",n:14,py:"Dàzhuī",hz:"大椎",tr:"Grande vertèbre",v:"back",x:200,y:186,reg:"dos",
+{id:"GV14",solo:"Passez la main par-dessus l'épaule opposée. Trouvez du majeur la vertèbre qui dépasse, puis glissez dans le creux juste en dessous.",m:"GV",n:14,py:"Dàzhuī",hz:"大椎",tr:"Grande vertèbre",v:"back",x:200,y:186,reg:"dos",
  cat:["Croisement des six méridiens Yang","Mer du Qi"],
  loc:"À la base du cou, sur la colonne, dans le creux juste sous la vertèbre la plus saillante (C7).",
  rep:"Penchez la tête en avant. La vertèbre qui dépasse le plus à la base du cou s'appelle C7. Le point est dans le creux juste en dessous.",
@@ -2185,7 +2191,7 @@ const POINTS = [
  fnt:["Calme l'esprit","Apaise le Yang du Foie"],
  ind:"Insomnie, agitation, vertiges.",
  note:"Point récent, très utilisé en Chine, mais absent de la liste officielle de l'OMS."},
-{id:"DINGCHUAN",m:"EX",n:4,code:"EX-B1",fr:"Dingchuan",py:"Dìngchuǎn",hz:"定喘",tr:"Calmer l'asthme",v:"back",x:192,y:186,reg:"dos",
+{id:"DINGCHUAN",solo:"Passez la main par-dessus l'épaule opposée, l'index et le majeur de part et d'autre du creux sous la vertèbre qui dépasse. Pressez les deux côtés en même temps.",m:"EX",n:4,code:"EX-B1",fr:"Dingchuan",py:"Dìngchuǎn",hz:"定喘",tr:"Calmer l'asthme",v:"back",x:192,y:186,reg:"dos",
  cat:[],
  loc:"À la base du cou, à 0,5 cun (un demi-pouce) de chaque côté du creux situé sous la vertèbre saillante (C7).",
  rep:"Trouvez VG 14, sous la vertèbre qui dépasse à la base du cou. Le point est à un demi-pouce de chaque côté.",
@@ -4871,6 +4877,13 @@ function screenPratiquer(){
   ["Jusqu'à la sensation juste", "Lourdeur, chaleur ou léger engourdissement : la tradition l'appelle le De Qi. Jamais de douleur vive."]
  ])}
  ${gauge()}
+ <h3>Seul, pour les points du dos</h3>
+ ${facts([
+  ["Une balle de tennis", "Contre un mur ou allongé au sol, placez-la sous le point et laissez le poids du corps appuyer. Plus doux debout, plus fort couché."],
+  ["Deux balles dans une chaussette", "Nouez-les côte à côte : la colonne passe entre les deux, et les points des deux côtés sont pressés en même temps."],
+  ["Jamais sur la colonne", "Ne roulez pas la balle sur les vertèbres. Pour un point de la ligne du milieu, pressez du bout du doigt ou avec la jointure du poing."],
+  ["Le bas du dos", "Mains sur la taille, pouces dans le dos : vous atteignez seul les points autour de la ligne des hanches. Chaque fiche concernée a une astuce « En solo »."]
+ ])}
  <h3>Les gestes</h3>
  ${facts([
   ["Pression fixe", "Vous appuyez et vous tenez. C'est le geste de base."],
@@ -5016,7 +5029,7 @@ function screenProfil(){
   ${PL.man && PL.man.credit ? `<p><b>Illustrations.</b> ${plEsc(PL.man.credit)}</p>` : ""}
   <p><b>Sons.</b> Enregistrements libres de droits, adaptés pour boucler sans coupure. Pluie : <a href="https://freesound.org/people/alex36917/sounds/524605/" target="_blank" rel="noopener">alex36917</a> ; vagues : <a href="https://freesound.org/people/Luftrum/sounds/48412/" target="_blank" rel="noopener">Luftrum</a> (Freesound, licence CC BY) ; oiseaux : kvgarlic ; ruisseau : gluckose (CC0), via l'application Blanket. Forêt, feu de bois, grillons, carillon, tonnerre, chouette et bol chantant : via l'application Moodist (CC0 ou licence Pixabay). Le piano, la nappe et les bruits sont fabriqués par l'app.</p>
  </div></div>
- <p class="fine">Version 34.</p>`;
+ <p class="fine">Version 34.2.</p>`;
 }
 
 // ── Premier lancement : choix de la silhouette ───────────────
@@ -5101,6 +5114,8 @@ function repSteps(t){
  const parts = t.split(/(?<=[.!?…])\s+(?=[A-ZÀ-ÖØ-Ý«0-9])/).map(x => x.trim()).filter(Boolean);
  return parts.length > 1 ? `<ol class="how-steps">${parts.map(x => `<li>${x}</li>`).join("")}</ol>` : `<p>${t}</p>`;
 }
+// Astuce pour presser seul un point difficile à atteindre (champ solo de data.js).
+const soloHTML = p => p.solo ? `<div class="solo"><h3><span class="msi" aria-hidden="true">self_improvement</span>En solo</h3><p>${p.solo}</p></div>` : "";
 const merCap = t => t ? `<span class="pl-mercap"><i aria-hidden="true"></i>${t}</span>` : "";
 const sidesTxt = p => p.id === "SISHENCONG" ? "Quatre points autour de VG 20" : bilateral(p) ? "Des deux côtés du corps" : p.m === "GV" || p.m === "CV" ? "Un seul point, sur la ligne du milieu" : "Un seul endroit";
 function pointHTML(p, W){
@@ -5120,7 +5135,7 @@ function pointHTML(p, W){
   <p class="ptr">${p.tr}</p>`}
   ${pregBanner}
   <figure class="card figcard pfig">${F.html}<figcaption class="pl-cap"><b>${F.cap}</b><span>${sidesTxt(p)}</span>${merCap(F.mer)}</figcaption>${(() => { const e_ = typeof plEntry === "function" ? plEntry(p) : null; return e_ && e_.note ? `<p class="pl-note">${e_.note}</p>` : ""; })()}</figure>
-  <div class="howto"><h2>Pour le trouver</h2>${repSteps(p.rep)}
+  <div class="howto"><h2>Pour le trouver</h2>${repSteps(p.rep)}${soloHTML(p)}
    <details class="more"><summary>Description précise (norme OMS)</summary><p>${p.loc}</p></details></div>
   <section class="sec"><h2>Fonctions <small class="h2-note">selon la tradition</small></h2><ul class="fn">${p.fn.map(f => `<li>${f}</li>`).join("")}</ul></section>
   <section class="sec"><h2>Utilisé pour</h2><p>${p.ind}</p></section>
@@ -5215,7 +5230,7 @@ function openBody(id){
   <h1 class="h1d">Où se trouve ${code(p)}</h1>
   <p class="sub">${p.py} · ${(t_ => t_.charAt(0).toLowerCase() + t_.slice(1))(sidesTxt(p))}</p>
   <figure class="card figcard pfig">${F.html}<figcaption class="pl-cap"><b>${F.cap}</b>${merCap(F.mer)}</figcaption></figure>
-  <div class="howto"><h2>Pour le trouver</h2>${repSteps(p.rep)}</div>
+  <div class="howto"><h2>Pour le trouver</h2>${repSteps(p.rep)}${soloHTML(p)}</div>
  </article>`);
 }
 function openPoint(id, replace){
