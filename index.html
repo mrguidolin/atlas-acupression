@@ -1370,6 +1370,10 @@ html{touch-action:manipulation}
 .sidebox .msi{flex:none;font-size:24px;color:var(--brand);margin-top:1px}
 .sidebox p{margin:0;line-height:1.45}
 
+.wk-side{display:inline-block;margin-left:8px;padding:3px 10px;border-radius:999px;font-size:.8rem;font-weight:700;color:var(--brand);background:color-mix(in srgb,var(--brand) 12%,transparent);vertical-align:middle;white-space:nowrap}
+.wk-segs .wk-seg.wk-r{margin-left:-2px}
+.wk-pt h1:focus,.wk-pt h1:focus-visible{outline:none!important;box-shadow:none!important}
+
 </style>
 </head>
 <body>
@@ -5051,7 +5055,7 @@ function screenProfil(){
   ${PL.man && PL.man.credit ? `<p><b>Illustrations.</b> ${plEsc(PL.man.credit)}</p>` : ""}
   <p><b>Sons.</b> Enregistrements libres de droits, adaptés pour boucler sans coupure. Pluie : <a href="https://freesound.org/people/alex36917/sounds/524605/" target="_blank" rel="noopener">alex36917</a> ; vagues : <a href="https://freesound.org/people/Luftrum/sounds/48412/" target="_blank" rel="noopener">Luftrum</a> (Freesound, licence CC BY) ; oiseaux : kvgarlic ; ruisseau : gluckose (CC0), via l'application Blanket. Forêt, feu de bois, grillons, carillon, tonnerre, chouette et bol chantant : via l'application Moodist (CC0 ou licence Pixabay). Le piano, la nappe et les bruits sont fabriqués par l'app.</p>
  </div></div>
- <p class="fine">Version 34.4.</p>`;
+ <p class="fine">Version 34.5.</p>`;
 }
 
 // ── Premier lancement : choix de la silhouette ───────────────
@@ -5151,7 +5155,8 @@ function pointHTML(p, W){
  const m = MER[p.m];
  const fav = S.favs.includes(p.id);
  const fw = Math.min(640, innerWidth) - 32;
- const F = pointFig(p, {ctx:"sheet", w:fw, aspect:"auto", tapLoc:true});
+ const LR = W && W.lr ? W.lr : null;
+ const F = pointFig(p, {ctx:"sheet", w:fw, aspect:"auto", tapLoc:true, lr:LR});
  const sib = POINTS.filter(q => q.m === p.m), i = sib.indexOf(p), prev = sib[i-1], next = sib[i+1];
  const pregBanner = p.preg && S.preg ? `<div class="alert" role="alert">${svgi("warn",18,2)}<span>${p.preg === "ci" ? "À éviter pendant votre grossesse." : "Grossesse : ne pressez pas fort sur cette zone."}</span></div>` : "";
  const precautions = [p.warn, (p.preg === "ci" && !p.warn) ? "À éviter pendant la grossesse." : null].filter(Boolean);
@@ -5159,12 +5164,12 @@ function pointHTML(p, W){
  const wHead = W ? bar(W.name, `<button class="iconbtn" data-act="fav" data-id="${p.id}" aria-pressed="${fav}" aria-label="${fav ? "Retirer de mes points" : "Garder dans mes points"}">${svgi("star",22,1.8,fav ? "currentColor" : "none")}</button>`) : "";
  return `${W ? `<div class="wk-head">${wHead}${walkCtx(W)}</div>` : head}
  <article class="detail${W ? " wk-detail" : ""}">
-  ${W ? `<div class="wk-pt"><span class="code" style="${elVar(p.m)}">${code(p)}</span><h1>${p.py}</h1><span class="han" lang="zh">${p.hz}</span><button class="mlink" data-mer="${p.m}" aria-label="Méridien : ${m.name}">${m.name} ${svgi("chev",12,2.2)}</button></div>` : `<div class="ptop"><span class="code" style="${elVar(p.m)}">${code(p)}</span><button class="mlink" data-mer="${p.m}">${m.name} ${svgi("chev",14,2.2)}</button></div>
+  ${W ? `<div class="wk-pt"><span class="code" style="${elVar(p.m)}">${code(p)}</span><h1>${p.py}</h1>${LR ? `<span class="wk-side">${LR === "L" ? "Côté gauche" : "Côté droit"}</span>` : ""}<span class="han" lang="zh">${p.hz}</span><button class="mlink" data-mer="${p.m}" aria-label="Méridien : ${m.name}">${m.name} ${svgi("chev",12,2.2)}</button></div>` : `<div class="ptop"><span class="code" style="${elVar(p.m)}">${code(p)}</span><button class="mlink" data-mer="${p.m}">${m.name} ${svgi("chev",14,2.2)}</button></div>
   <div class="ptitle"><h1>${p.py}</h1><span class="han" lang="zh">${p.hz}</span></div>
   <p class="ptr">${p.tr}</p>`}
   ${pregBanner}
   <figure class="card figcard pfig">${F.html}<figcaption class="pl-cap"><b>Schéma : ${lcFirst(F.cap)}</b>${merCap(F.mer)}</figcaption>${(() => { const e_ = typeof plEntry === "function" ? plEntry(p) : null; return e_ && e_.note ? `<p class="pl-note">${e_.note}</p>` : ""; })()}</figure>
-  ${sideBox(p)}
+  ${W ? walkSideBox(p, W) : sideBox(p)}
   <div class="howto"><h2>Pour le trouver</h2>${repSteps(p.rep)}${soloHTML(p)}
    <details class="more"><summary>Description précise (norme OMS)</summary><p>${p.loc}</p></details></div>
   <section class="sec"><h2>Fonctions <small class="h2-note">selon la tradition</small></h2><ul class="fn">${p.fn.map(f => `<li>${f}</li>`).join("")}</ul></section>
@@ -5182,50 +5187,68 @@ function pointHTML(p, W){
 // ── Parcours d'un protocole, point par point, sans minuteur ──────
 // W = {ref, name, ids, i}. La fiche est remplacée sur place : « Retour »
 // ramène toujours au protocole en une touche.
-function walkOf(ref, id){
+// Un point double donne deux fiches : côté gauche, puis côté droit.
+function walkOf(ref, id, step){
  const [ck, sk] = ref.split("/");
  const c = SYMPTOMS.find(x => x.k === ck), it = c && c.items.find(x => x.k === sk);
  if (!it) return null;
  const ids = it.pts.filter(x => BY[x]);
- const i = ids.indexOf(id);
- return i < 0 ? null : {ref, name: it.name, ids, i};
+ const steps = [];
+ ids.forEach(x => { if (bilateral(BY[x])) steps.push({id:x, lr:"L"}, {id:x, lr:"R"}); else steps.push({id:x, lr:null}); });
+ let i = step !== undefined && step !== "" && steps[+step] && steps[+step].id === id ? +step : steps.findIndex(s => s.id === id);
+ if (i < 0) return null;
+ return mkW(ref, it.name, ids, steps, i);
+}
+function mkW(ref, name, ids, steps, i){
+ const st = steps[i];
+ return {ref, name, ids, steps, i, id: st.id, lr: st.lr, pi: ids.indexOf(st.id)};
+}
+const sideWord = lr => lr === "L" ? "côté gauche" : lr === "R" ? "côté droit" : "";
+function walkSideBox(p, W){
+ if (!W.lr) return sideBox(p);
+ const nx = W.steps[W.i + 1];
+ const then = W.lr === "L" ? "Ensuite : le même point, côté droit." : nx ? `Ensuite : ${code(BY[nx.id])}${nx.lr ? ", côté gauche" : ""}.` : "C'est le dernier point.";
+ return `<div class="sidebox"><span class="msi" aria-hidden="true">touch_app</span><p><b>${W.lr === "L" ? "Côté gauche." : "Côté droit."}</b> Pressez ce point sur votre ${W.lr === "L" ? "gauche" : "droite"}. ${then}</p></div>`;
 }
 const ciMark = p => S.preg && p.preg === "ci";
 const wkName = p => `${code(p)} ${p.py}`;
 function walkCtx(W){
  const N = W.ids.length;
  return `<div class="wk-ctx">
-  <div class="wk-row"><span class="wk-count">Point ${W.i + 1} sur ${N}</span>${W.i > 0 ? `<button class="wk-first" data-wgo="0" aria-label="Revenir au premier point : ${wkName(BY[W.ids[0]])}"><span class="msi" aria-hidden="true">first_page</span>Début</button>` : ""}</div>
-  <div class="wk-segs" role="group" aria-label="Points du protocole">${W.ids.map((id, j) => { const q = BY[id];
-   return `<button class="wk-seg${j < W.i ? " done" : j === W.i ? " cur" : ""}${ciMark(q) ? " is-ci" : ""}" data-wgo="${j}" aria-label="Point ${j + 1} : ${wkName(q)}${ciMark(q) ? ", à éviter pendant la grossesse" : ""}"${j === W.i ? ' aria-current="step"' : ""}><i></i></button>`; }).join("")}</div>
+  <div class="wk-row"><span class="wk-count">Point ${W.pi + 1} sur ${N}${W.lr ? ` · ${sideWord(W.lr)}` : ""}</span>${W.i > 0 ? `<button class="wk-first" data-wgo="0" aria-label="Revenir au premier point : ${wkName(BY[W.ids[0]])}"><span class="msi" aria-hidden="true">first_page</span>Début</button>` : ""}</div>
+  <div class="wk-segs" role="group" aria-label="Étapes du protocole">${W.steps.map((s, j) => { const q = BY[s.id];
+   return `<button class="wk-seg${s.lr === "R" ? " wk-r" : ""}${j < W.i ? " done" : j === W.i ? " cur" : ""}${ciMark(q) ? " is-ci" : ""}" data-wgo="${j}" aria-label="${wkName(q)}${s.lr ? ", " + sideWord(s.lr) : ""}${ciMark(q) ? ", à éviter pendant la grossesse" : ""}"${j === W.i ? ' aria-current="step"' : ""}><i></i></button>`; }).join("")}</div>
 
  </div>`;
 }
 function walkEnd(W){
- if (W.i < W.ids.length - 1) return "";
+ if (W.i < W.steps.length - 1) return "";
  return `<section class="wk-done"><span class="wk-done-ic"><span class="msi msi-fill" aria-hidden="true">check_circle</span></span>
   <div><b>Vous avez vu les ${W.ids.length} points</b><p>Pour les enchaîner avec un minuteur et un signal sonore, lancez la séance guidée.</p>
   <button class="btn btn-soft wk-sess" data-s="setup" data-ref="${W.ref}"><span class="msi msi-fill" aria-hidden="true">play_arrow</span>Lancer la séance guidée</button></div></section>`;
 }
 function walkFoot(W){
- const N = W.ids.length, pv = W.i > 0 && BY[W.ids[W.i - 1]], nx = W.i < N - 1 && BY[W.ids[W.i + 1]];
+ const N = W.steps.length, pv = W.i > 0 && W.steps[W.i - 1], nx = W.i < N - 1 && W.steps[W.i + 1];
+ const nq = nx && BY[nx.id], pq = pv && BY[pv.id];
+ const nxSmall = nx ? (nx.id === W.id ? "Suivant · même point" : `Suivant · point ${W.ids.indexOf(nx.id) + 1}/${W.ids.length}${nx.lr ? " · gauche" : ""}`) : "";
  return `<nav class="wk-foot" aria-label="Parcours du protocole">
-  <button class="wk-prev" data-wgo="${W.i - 1}" ${pv ? `aria-label="Point précédent : ${wkName(pv)}"` : "disabled aria-label=\"Pas de point précédent\""}><span class="msi" aria-hidden="true">arrow_back</span>Précédent</button>
-  ${nx ? `<button class="wk-next" data-wgo="${W.i + 1}" aria-label="Point suivant : ${code(nx)}, ${nx.py}${ciMark(nx) ? ", à éviter pendant la grossesse" : ""}"><span class="wk-next-t"><small>Suivant · ${W.i + 2}/${N}</small><b><span class="wk-code">${code(nx)}</span>${nx.py}</b></span><span class="msi" aria-hidden="true">arrow_forward</span></button>`
+  <button class="wk-prev" data-wgo="${W.i - 1}" ${pv ? `aria-label="Étape précédente : ${wkName(pq)}${pv.lr ? ", " + sideWord(pv.lr) : ""}"` : "disabled aria-label=\"Pas d'étape précédente\""}><span class="msi" aria-hidden="true">arrow_back</span>Précédent</button>
+  ${nx ? `<button class="wk-next" data-wgo="${W.i + 1}" aria-label="Suivant : ${code(nq)}, ${nq.py}${nx.lr ? ", " + sideWord(nx.lr) : ""}${ciMark(nq) ? ", à éviter pendant la grossesse" : ""}"><span class="wk-next-t"><small>${nxSmall}</small><b><span class="wk-code">${code(nq)}</span>${nx.id === W.id ? "Côté droit" : nq.py}</b></span><span class="msi" aria-hidden="true">arrow_forward</span></button>`
    : `<button class="wk-next wk-end" data-act="back" aria-label="Terminer et revenir au protocole"><span class="wk-next-t"><b>Terminer</b></span><span class="msi" aria-hidden="true">check</span></button>`}
  </nav>`;
 }
 function openWalk(ref, id){
  const W = walkOf(ref, id); if (!W) return openPoint(id);
- push(pointHTML(BY[id], W), el => { el.dataset.point = id; el.dataset.walk = ref; el.classList.add("walk"); el.scrollTop = 0; walkBind(el); });
+ push(pointHTML(BY[id], W), el => { el.dataset.point = id; el.dataset.step = W.i; el.dataset.walk = ref; el.classList.add("walk"); el.scrollTop = 0; walkBind(el); });
 }
+const walkCur = sheet => walkOf(sheet.dataset.walk, sheet.dataset.point, sheet.dataset.step);
 function walkGo(sheet, j, dir){
- const W = walkOf(sheet.dataset.walk, sheet.dataset.point); if (!W) return;
- if (j < 0 || j >= W.ids.length || j === W.i) return;
- W.i = j; const id = W.ids[j];
- const d = dir || (j > walkOf(sheet.dataset.walk, sheet.dataset.point).i ? 1 : -1);
+ const W0 = walkCur(sheet); if (!W0) return;
+ if (j < 0 || j >= W0.steps.length || j === W0.i) return;
+ const d = dir || (j > W0.i ? 1 : -1);
+ const W = mkW(W0.ref, W0.name, W0.ids, W0.steps, j), id = W.id;
  sheet.innerHTML = pointHTML(BY[id], W);
- sheet.dataset.point = id; sheet.scrollTop = 0;
+ sheet.dataset.point = id; sheet.dataset.step = j; sheet.scrollTop = 0;
  if (!reduceMotion()){ const a = sheet.querySelector(".detail"); a.classList.add(d > 0 ? "wk-in-next" : "wk-in-prev"); a.addEventListener("animationend", () => a.classList.remove("wk-in-next", "wk-in-prev"), {once:true}); }
  const h = sheet.querySelector(".ptitle h1, .wk-pt h1"); if (h){ h.tabIndex = -1; h.focus({preventScroll:true}); }
 }
@@ -5240,14 +5263,14 @@ function walkBind(el){
   if (!ok || !el.dataset.walk) return; ok = false;
   const t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0;
   if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.6 || Date.now() - t0 > 700) return;
-  const W = walkOf(el.dataset.walk, el.dataset.point); if (!W) return;
+  const W = walkCur(el); if (!W) return;
   walkGo(el, W.i + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1);
  }, {passive:true});
  el.addEventListener("keydown", e => {
   if (!el.dataset.walk || e.altKey || e.metaKey || e.ctrlKey || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
   if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
   if (stack[stack.length - 1] !== el) return;
-  const W = walkOf(el.dataset.walk, el.dataset.point); if (!W) return;
+  const W = walkCur(el); if (!W) return;
   e.preventDefault(); walkGo(el, W.i + (e.key === "ArrowRight" ? 1 : -1));
  });
 }
