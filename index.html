@@ -1373,6 +1373,7 @@ html{touch-action:manipulation}
 .wk-side{display:inline-block;margin-left:8px;padding:3px 10px;border-radius:999px;font-size:.8rem;font-weight:700;color:var(--brand);background:color-mix(in srgb,var(--brand) 12%,transparent);vertical-align:middle;white-space:nowrap}
 .wk-segs .wk-seg.wk-r{margin-left:-2px}
 .wk-pt h1:focus,.wk-pt h1:focus-visible{outline:none!important;box-shadow:none!important}
+.sess-cta.sess-after{margin-top:14px}
 
 </style>
 </head>
@@ -2774,7 +2775,7 @@ function landmarkLayer(v, on, u, showLabels=true, box=null){
 // Uniquement des déclarations : S, BY, code()… viennent de app.js.
 // ─────────────────────────────────────────────────────────────
 const PL_DIR = "plates/";
-const PL_V = "?v=34"; // change à chaque nouvelle série de planches (cache iPhone)
+const PL_V = "?v=34j"; // change à chaque nouvelle série de planches (cache iPhone)
 const PL = { man:null, loc:{}, bb:{}, small:{} };
 
 function plLoad(){
@@ -5055,7 +5056,7 @@ function screenProfil(){
   ${PL.man && PL.man.credit ? `<p><b>Illustrations.</b> ${plEsc(PL.man.credit)}</p>` : ""}
   <p><b>Sons.</b> Enregistrements libres de droits, adaptés pour boucler sans coupure. Pluie : <a href="https://freesound.org/people/alex36917/sounds/524605/" target="_blank" rel="noopener">alex36917</a> ; vagues : <a href="https://freesound.org/people/Luftrum/sounds/48412/" target="_blank" rel="noopener">Luftrum</a> (Freesound, licence CC BY) ; oiseaux : kvgarlic ; ruisseau : gluckose (CC0), via l'application Blanket. Forêt, feu de bois, grillons, carillon, tonnerre, chouette et bol chantant : via l'application Moodist (CC0 ou licence Pixabay). Le piano, la nappe et les bruits sont fabriqués par l'app.</p>
  </div></div>
- <p class="fine">Version 34.5.</p>`;
+ <p class="fine">Version 34.6.</p>`;
 }
 
 // ── Premier lancement : choix de la silhouette ───────────────
@@ -5413,7 +5414,7 @@ function openSymptom(ref){
  const care = it.care ? `<div class="care"><span class="msi msi-fill" aria-hidden="true">favorite</span><span>${it.care}</span></div>` : "";
  const warn = c.warn ? `<section class="sec"><h2>Précautions</h2><ul class="warnlist">${c.warn.map(w => `<li>${w}</li>`).join("")}</ul></section>` : "";
  const tips = it.tips ? `<section class="sec"><h2>Ce qui aide vraiment</h2><ul class="tips">${it.tips.map(t => `<li><span class="msi" aria-hidden="true">check_circle</span><span>${t}</span></li>`).join("")}</ul></section>` : "";
- const ptsSec = pts.length ? `<section class="sec"><h2>${it.tips && !it.ptsFirst ? "Pour les effets des médicaments" : "Où presser"} · ${pts.length} point${pts.length>1?"s":""}</h2><div class="pcards">${cards}</div><p class="cap" style="text-align:left">Touchez un point pour savoir comment le trouver.</p></section>` : "";
+ const ptsSec = pts.length ? `<section class="sec"><h2>${it.tips && !it.ptsFirst ? "Pour les effets des médicaments" : "Où presser"} · ${pts.length} point${pts.length>1?"s":""}</h2><div class="pcards">${cards}</div><p class="cap" style="text-align:left">Touchez un point pour savoir comment le trouver.</p><button class="sess-cta sess-after" data-s="setup" data-ref="${ck}/${sk}"><span class="sess-cta-ic"><span class="msi msi-fill" aria-hidden="true">play_arrow</span></span><span><b>Séance guidée</b><small>${nOn} point${nOn>1?"s":""} · environ ${fmtTotal(estimate(it))} · avec minuteur</small></span>${CHEV}</button></section>` : "";
  const body = it.ptsFirst ? ptsSec + tips + warn
   : it.tips ? tips + ptsSec + (pts.length ? warn : "")
   : (pts.length ? warn : "") + ptsSec;
@@ -5425,7 +5426,6 @@ function openSymptom(ref){
   <p class="sub">${it.intro}</p>
   ${pregNote}${pregHint}
   ${care}
-  ${pts.length ? `<button class="sess-cta" data-s="setup" data-ref="${ck}/${sk}"><span class="sess-cta-ic"><span class="msi msi-fill" aria-hidden="true">play_arrow</span></span><span><b>Séance guidée</b><small>${nOn} point${nOn>1?"s":""} · environ ${fmtTotal(estimate(it))} · avec minuteur</small></span>${CHEV}</button>` : ""}
   ${it.breath ? `<button class="sess-cta brc-cta" data-breath="${it.breath}"><span class="sess-cta-ic"><span class="msi" aria-hidden="true">air</span></span><span><b>Respiration guidée</b><small>Pour apaiser · inspirez 4 secondes, soufflez 8 secondes</small></span>${CHEV}</button>` : ""}
   ${body}
   ${seeDr}
