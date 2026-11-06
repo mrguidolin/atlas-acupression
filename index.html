@@ -4045,6 +4045,7 @@ function estimate(it){ // durée estimée avec les réglages enregistrés
 
 // ── Préparation ─────────────────────────────────────────────
 function openSetup(ref){
+ if (typeof track === "function") track("seance/" + ref, ref);
  const [ck, sk] = ref.split("/");
  const cat = SYMPTOMS.find(x => x.k === ck), it = cat && cat.items.find(x => x.k === sk);
  if (!it || !it.pts.length) return;
@@ -5048,6 +5049,7 @@ function screenProfil(){
  <div class="sect"><div class="sect-t">Partager l'app</div>
  <div class="list-card share-card"><div class="share-row"><span class="share-url" id="app-url"><span class="nw">mrguidolin.github.io/</span><wbr><span class="nw">atlas-acupression/</span></span><button class="iconbtn share-copy" data-act="copy-url" aria-label="Copier l'adresse de l'app"><span class="msi" aria-hidden="true">content_copy</span></button></div>
  <p class="share-sub" aria-live="polite">Copiez l'adresse et envoyez-la : la personne l'ouvre dans Safari, puis Partager › Sur l'écran d'accueil.</p></div></div>
+ ${GC_ON ? `<p class="fine" style="text-align:left;margin:4px 16px 0">Statistiques de visite anonymes, sans cookie ni donnée personnelle (GoatCounter).</p>` : ""}
  <div class="sect"><div class="sect-t">Sources</div>
  <div class="list-card prose" style="padding:16px 16px 4px;font-size:.94rem">
   <p><b>Emplacement des points.</b> Norme internationale de l'OMS (2008). Quand une école place un point ailleurs, la fiche le dit.</p>
@@ -5056,7 +5058,7 @@ function screenProfil(){
   ${PL.man && PL.man.credit ? `<p><b>Illustrations.</b> ${plEsc(PL.man.credit)}</p>` : ""}
   <p><b>Sons.</b> Enregistrements libres de droits, adaptés pour boucler sans coupure. Pluie : <a href="https://freesound.org/people/alex36917/sounds/524605/" target="_blank" rel="noopener">alex36917</a> ; vagues : <a href="https://freesound.org/people/Luftrum/sounds/48412/" target="_blank" rel="noopener">Luftrum</a> (Freesound, licence CC BY) ; oiseaux : kvgarlic ; ruisseau : gluckose (CC0), via l'application Blanket. Forêt, feu de bois, grillons, carillon, tonnerre, chouette et bol chantant : via l'application Moodist (CC0 ou licence Pixabay). Le piano, la nappe et les bruits sont fabriqués par l'app.</p>
  </div></div>
- <p class="fine">Version 34.6.</p>`;
+ <p class="fine">Version 34.7.</p>`;
 }
 
 // ── Premier lancement : choix de la silhouette ───────────────
@@ -5287,7 +5289,14 @@ function openBody(id){
   <div class="howto"><h2>Pour le trouver</h2>${repSteps(p.rep)}${soloHTML(p)}</div>
  </article>`);
 }
+// ── Statistiques de visite (GoatCounter : sans cookie, sans donnée personnelle) ──
+// Mettre ici le code du compte GoatCounter (ex. "atlas-acupression"). Vide = rien n'est compté.
+const GC_CODE = "namaonline";
+const GC_ON = !!GC_CODE && location.hostname === "mrguidolin.github.io";
+if (GC_ON){ try { const s = document.createElement("script"); s.async = true; s.src = "https://gc.zgo.at/count.js"; s.dataset.goatcounter = `https://${GC_CODE}.goatcounter.com/count`; document.head.appendChild(s); } catch(e) {} }
+function track(path, title){ if (!GC_ON) return; try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({path, title, event:true}); } catch(e) {} }
 function openPoint(id, replace){
+ track("point/" + id, BY[id] ? code(BY[id]) + " " + BY[id].py : id);
  const p = BY[id]; if (!p) return;
  const mount = el => { el.dataset.point = id; el.scrollTop = 0; };
  if (replace && stack.length && stack[stack.length-1].dataset.point) replaceTop(pointHTML(p), mount); else push(pointHTML(p), mount);
@@ -5395,6 +5404,7 @@ function openCategory(k){
  </article>`);
 }
 function openSymptom(ref){
+ track("protocole/" + ref, ref);
  const [ck, sk] = ref.split("/");
  const c = SYMPTOMS.find(x => x.k === ck); const it = c && c.items.find(x => x.k === sk); if (!it) return;
  const pts = it.pts.map(id => BY[id]);
