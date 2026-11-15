@@ -1449,6 +1449,10 @@ html{touch-action:manipulation}
 .src-d summary::after{content:" ›"}
 .src-d[open] summary::after{content:" ⌄"}
 .src-d .list-card{margin-top:6px}
+
+/* v36.0 · Repères en page de texte ; illustrations de mesure plus grandes */
+.rep-prose h2:first-child{margin-top:8px}
+.cun svg{max-width:140px}
 </style>
 </head>
 <body>
@@ -5104,14 +5108,70 @@ function screenPratiquer(){
 }
 
 // ── Onglet Repères ───────────────────────────────────────────
+// Mesure en cun : main gauche vue côté paume, doigts serrés, dans le style des
+// planches 3D (peau modelée, trait fin, plis des articulations). Les doigts qui
+// servent à la mesure sont nets, les autres estompés ; la règle bleue est posée
+// sur le pli de l'articulation du milieu des doigts (ou sur l'articulation du pouce).
 function cunFig(n){
- const widths = [[22],[15,15],[15,15,14],[15,15,14,12]][n-1];
- const total = widths.reduce((a,b)=>a+b,0) + (widths.length-1)*1.5;
- let x = (120 - total)/2, g = "";
- widths.forEach((fw,i) => { const h = n===1 ? 46 : [50,56,52,42][i]; g += `<rect x="${x}" y="${70-h}" width="${fw}" height="${h+30}" rx="${fw/2}" style="fill:var(--fig-paper);stroke:var(--fig-line);stroke-width:2.6"/>`; x += fw + 1.5; });
- const x0 = (120-total)/2, x1 = x0 + total, ly = n === 1 ? 40 : 52;
- g += `<path d="M${x0} ${ly} H${x1} M${x0} ${ly-5} V${ly+5} M${x1} ${ly-5} V${ly+5}" style="stroke:var(--brand);stroke-width:3;stroke-linecap:round;fill:none"/>`;
- return `<svg viewBox="0 0 120 100" aria-hidden="true">${g}</svg>`;
+ const uid = "cf" + n;
+ const SK = {edge:"#d6a391", mid:"#ecc3b2", light:"#f6dccf", line:"#b07c6a", crease:"#b08a7d"};
+ const defs = `<defs>
+  <linearGradient id="${uid}f" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="${SK.edge}"/><stop offset=".2" stop-color="${SK.mid}"/><stop offset=".52" stop-color="${SK.light}"/><stop offset=".84" stop-color="${SK.mid}"/><stop offset="1" stop-color="${SK.edge}"/></linearGradient>
+  <radialGradient id="${uid}p" cx=".5" cy=".25" r=".85"><stop offset="0" stop-color="${SK.light}"/><stop offset=".55" stop-color="${SK.mid}"/><stop offset="1" stop-color="${SK.edge}"/></radialGradient>
+  <linearGradient id="${uid}s" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#9c6a5a" stop-opacity="0"/><stop offset="1" stop-color="#9c6a5a" stop-opacity=".22"/></linearGradient>
+  <linearGradient id="${uid}m" x1="0" x2="0" y1="0" y2="1"><stop offset=".74" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  <mask id="${uid}k"><rect width="140" height="170" fill="url(#${uid}m)"/></mask>
+ </defs>`;
+ const st = `stroke:${SK.line};stroke-width:.9;stroke-linejoin:round;stroke-linecap:round`;
+ const cr = `fill:none;stroke:${SK.crease};stroke-width:.65;stroke-linecap:round;opacity:.9`;
+ // courbe lisse passant par des points (Catmull-Rom → Bézier)
+ const smooth = P => { let d = ""; for (let i = 0; i < P.length - 1; i++){ const p0 = P[i - 1] || P[i], p1 = P[i], p2 = P[i + 1], p3 = P[i + 2] || p2;
+   d += ` C${(p1[0] + (p2[0] - p0[0]) / 6).toFixed(2)} ${(p1[1] + (p2[1] - p0[1]) / 6).toFixed(2)} ${(p2[0] - (p3[0] - p1[0]) / 6).toFixed(2)} ${(p2[1] - (p3[1] - p1[1]) / 6).toFixed(2)} ${p2[0].toFixed(2)} ${p2[1].toFixed(2)}`; } return d; };
+ // doigt : axe cx, largeur w à la base y0, bout en ytip ; profil avec renflements aux articulations
+ const finger = (cx, w, y0, ytip, fade, opts = {}) => {
+  const L = y0 - ytip, pip = y0 - L * .42, dip = y0 - L * .72;
+  const prof = opts.prof || [[0, 1], [.25, .95], [.42, .985], [.57, .9], [.72, .93], [.86, .86]];
+  const sideL = prof.map(([f, k]) => [cx - w * k / 2, y0 - L * f]), sideR = prof.map(([f, k]) => [cx + w * k / 2, y0 - L * f]).reverse();
+  const tw = w * prof[prof.length - 1][1], r = tw / 2, yt = y0 - L * prof[prof.length - 1][0];
+  const top = ` C${cx - r} ${yt - r * 1.25} ${cx + r} ${yt - r * 1.25} ${cx + r} ${yt}`;
+  const outline = `M${sideL[0][0]} ${sideL[0][1]}` + smooth(sideL) + top + smooth(sideR);
+  const fill = outline + " Z";
+  const hw = w * .3;
+  const creases = `<path d="M${cx - hw} ${pip} q${hw} 1.7 ${hw * 2} 0 M${cx - hw * .8} ${pip + 2.3} q${hw * .8} 1.3 ${hw * 1.6} 0 M${cx - hw * .7} ${dip} q${hw * .7} 1.3 ${hw * 1.4} 0" style="${cr}"/>`;
+  return { pip, svg: `<g opacity="${fade ? .36 : 1}"><path d="${fill}" style="fill:url(#${uid}f);stroke:none"/><path d="${outline}" style="fill:none;${st}"/>${opts.extra || creases}</g>` };
+ };
+ let body = "", bar;
+ if (n === 1){
+  // pouce gauche vu du dessus : plus court et plus large, ongle, articulation
+  const cx = 70, w = 27, y0 = 172, ytip = 40, L = y0 - ytip;
+  const prof = [[0, 1.02], [.3, .98], [.52, 1.03], [.62, 1], [.8, .97], [.93, .9]];
+  const ip = y0 - L * .52, nt = y0 - L * .93;
+  const nail = `<path d="M${cx - 9} ${nt + 6} C${cx - 9.5} ${nt - 2} ${cx + 9.5} ${nt - 2} ${cx + 9} ${nt + 6} L${cx + 8.4} ${nt + 25} Q${cx} ${nt + 28.5} ${cx - 8.4} ${nt + 25} Z" style="fill:#f8e3dc;stroke:${SK.crease};stroke-width:.8"/>
+   <path d="M${cx - 6} ${nt + 22} Q${cx} ${nt + 24.5} ${cx + 6} ${nt + 22}" style="${cr};opacity:.6"/>`;
+  const knuckle = `<path d="M${cx - 8} ${ip - 3} q8 -2.4 16 0 M${cx - 9.5} ${ip + .5} q9.5 -2.2 19 0 M${cx - 7.5} ${ip + 4} q7.5 -2 15 0" style="${cr}"/>`;
+  const f = finger(cx, w, y0, ytip, false, {prof, extra: nail + knuckle});
+  body = f.svg;
+  bar = {x0: cx - w * 1.03 / 2 - 1.5, x1: cx + w * 1.03 / 2 + 1.5, y: ip + .5};
+ } else {
+  // main gauche côté paume : pouce à gauche, puis index, majeur, annulaire, auriculaire
+  const W = [18, 19, 17.5, 15], TIP = [30, 21, 27, 43], Y0 = [108, 106, 107, 111], used = n;
+  let x = 36; const C = W.map(w => { const c = x + w / 2; x += w; return c; }), xr = x;
+  // paume dessinée après les doigts : elle recouvre leur base, comme sur les planches
+  const top = [[31,128],[34,113],[45,111.5],[64,110.5],[83,111],[xr - 3,113],[xr + 2,121]];
+  const sides = [[xr + 2,121],[xr + 3,150],[xr + 1,176]];
+  const palmFill = `<path d="M31 128${smooth(top)}${smooth(sides)} L36 176${smooth([[36,176],[33,152],[31,128]])} Z" style="fill:url(#${uid}p);stroke:none"/>`;
+  const palmEdge = `<path d="M${xr + 2} 121${smooth(sides)} M36 176${smooth([[36,176],[33,152],[31,128],[34,113]])}" style="fill:none;${st}"/>`;
+  const thumb = `<g opacity=".36"><path d="M34 152${smooth([[34,152],[24,140],[15,124],[11,110],[13,101],[20,100],[25,108],[31,121],[38,132]])}" style="fill:url(#${uid}f);${st}"/></g>`;
+  const F = W.map((w, i) => finger(C[i], w, 120, TIP[i] + (Y0[i] - 106), i >= used));
+  const roots = C.map((c, i) => { const hw = W[i] * .32; return `<path d="M${c - hw} ${113.5} q${hw} 1.4 ${hw * 2} 0 M${c - hw * .85} ${116} q${hw * .85} 1.2 ${hw * 1.7} 0" style="${cr};opacity:${i >= used ? .35 : .8}"/>`; }).join("");
+  const palmLines = `<path d="M38 132 q20 -6 44 -2 M${xr - 32} 125 q16 -3 30 2 M42 166 q12 -16 30 -34" style="${cr};opacity:.5"/>`;
+  body = thumb + F.map(f => f.svg).join("") + palmFill + palmEdge + roots + palmLines;
+  bar = {x0: 36 - .5, x1: 36 + W.slice(0, used).reduce((a, b) => a + b, 0) + .5, y: F[1].pip};
+ }
+ const {x0, x1, y} = bar;
+ const rp = `M${x0} ${y} H${x1} M${x0} ${y - 6} V${y + 6} M${x1} ${y - 6} V${y + 6}`;
+ const ruler = `<path d="${rp}" style="fill:none;stroke:#fff;stroke-width:5.5;stroke-linecap:round;opacity:.9"/><path d="${rp}" style="fill:none;stroke:var(--brand);stroke-width:2.6;stroke-linecap:round"/>`;
+ return `<svg viewBox="0 0 140 170" aria-hidden="true">${defs}<g mask="url(#${uid}k)">${body}</g>${ruler}</svg>`;
 }
 const LEXIQUE = [
  ["Qi","L'énergie vitale qui, selon la tradition, anime le corps et circule dans les méridiens."],
@@ -5138,7 +5198,7 @@ const CLIMATS = [
 function screenReperes(){
  return `<header class="appbar"><h1>Repères</h1></header>
  <p class="lead">Pour mesurer sur le corps et comprendre les mots de la médecine chinoise.</p>
- ${accPage("reperes", `
+ <div class="prose rep-prose">
  <h2>Mesurer en cun</h2>
  <p>Le <b>cun</b> est l'unité de mesure de la médecine chinoise. Elle s'adapte à chaque corps : on mesure toujours avec les doigts de la personne qui reçoit le soin, pas avec les siens.</p>
  <div class="cun">
@@ -5159,7 +5219,7 @@ function screenReperes(){
  <div class="climats">${CLIMATS.map(([ic, t, d]) => `<div class="clim"><span class="msi" aria-hidden="true">${ic}</span><b>${t}</b><p>${d}</p></div>`).join("")}</div>
  <h3>La pratique</h3>
  ${facts(LEXIQUE.filter(([t]) => ["De Qi","Tonifier, disperser","Vaisseaux extraordinaires","Acupression, acupuncture, shiatsu","Moxa"].includes(t)))}
- `)}`;
+ </div>`;
 }
 
 // ── Onglet Profil ────────────────────────────────────────────
@@ -5168,7 +5228,7 @@ const APP_URL = "https://mrguidolin.github.io/atlas-acupression/";
 // l'iPhone, compare les numéros de version et recharge si besoin. La
 // lecture « reload » remplace aussi la copie en cache : au prochain
 // lancement, l'app s'ouvre directement sur la nouvelle version.
-const APP_VERSION = "35.9";
+const APP_VERSION = "36.0";
 const verCmp = (a, b) => { const x = a.split(".").map(Number), y = b.split(".").map(Number); for (let i = 0; i < Math.max(x.length, y.length); i++){ const d = (x[i] || 0) - (y[i] || 0); if (d) return d; } return 0; };
 async function checkUpdate(btn){
  const st = $(".ver-st"), say = m => { if (st) st.textContent = m; };
