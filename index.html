@@ -5126,7 +5126,7 @@ function cunFig(n){
  const tipArc = (f, from) => `A${r(f)} ${r(f)} 0 0 1 ${f[1]} ${f[2] + r(f)}`;
  let d = `M46 98 L${FG[0][0]} ${FG[0][2] + r(FG[0])} ${tipArc(FG[0])}`;
  for (let i = 1; i < 4; i++){ const f = FG[i]; d += ` L${f[0]} ${Math.max(FG[i-1][2], f[2]) + r(f)}`; d += ` L${f[0]} ${f[2] + r(f)} ${tipArc(f)}`; }
- d += ` L105 82 C107.5 92 109 108 108 124 C107.5 136 106 150 105.5 176 L44.5 176 C44 156 43.5 142 42 136`;
+ d += ` L105 82 C107.5 91 109.5 105 109 118 C108.5 130 104.5 139 100.5 147 C100 156 100.5 166 101.5 176 L51.5 176 C52 166 52.5 157 52.5 150 C49.5 146 45 141.5 42 136`;
  d += ` C37 128 29 116 22.5 101 C19 93 15 85 14.5 79.5 C14 72.5 22 70.5 25.5 77 C29 84 33 91 40 95.5 C42.5 97 44.5 97.5 46 98 Z`;
  // séparations entre les doigts (de l'écart des bouts jusqu'au creux)
  let sep = "";
@@ -5137,7 +5137,7 @@ function cunFig(n){
  FG.forEach(f => { const L = WEB - f[2];
   crease += fold(f, WEB + 1.5, .7) + fold(f, WEB + 4, .55) + fold(f, WEB - L * .40) + fold(f, WEB - L * .40 + 2.6, .5) + fold(f, WEB - L * .70, .5); });
  // paume : lignes de cœur, de tête et de vie ; pli du pouce
- crease += `M104 96 C92 92 78 92 66 96 M100 106 C86 101 70 101 58 106 M50 102 C46 114 47 128 54 146`;
+ crease += `M104 96 C92 92 78 92 66 96 M100 106 C86 101 70 101 58 106 M50 102 C46 114 47.5 128 56 141.5 M56 151.5 Q76 154.5 97 150.5 M57 155.5 Q76 158 96 154.5`;
  const IP = [26.4, 92.5], TA = [-.42, -.91];          // articulation du pouce et axe du pouce
  const TN = [TA[1], -TA[0]];
  crease += `M${IP[0] - TN[0] * 5.4} ${IP[1] - TN[1] * 5.4} Q${IP[0] + TA[0] * 1.6} ${IP[1] + TA[1] * 1.6} ${IP[0] + TN[0] * 5.4} ${IP[1] + TN[1] * 5.4}`;
@@ -5160,7 +5160,7 @@ function cunFig(n){
  const ruler = `<path d="${rp}" style="fill:none;stroke:${paper};stroke-width:5.5;stroke-linecap:round"/><path d="${rp}" style="fill:none;stroke:var(--brand);stroke-width:2.6;stroke-linecap:round"/>`;
  return `<svg viewBox="4 10 112 150" aria-hidden="true"><defs>
   <clipPath id="${uid}c"><path d="${d}"/></clipPath>
-  <linearGradient id="${uid}g" x1="0" x2="0" y1="0" y2="1"><stop offset=".78" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  <linearGradient id="${uid}g" x1="0" x2="0" y1="0" y2="1"><stop offset=".86" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
   <mask id="${uid}m"><rect x="0" y="0" width="140" height="170" fill="url(#${uid}g)"/></mask></defs>
   <g mask="url(#${uid}m)">
    <path d="${d}" style="fill:${paper}"/>
@@ -5225,7 +5225,7 @@ const APP_URL = "https://mrguidolin.github.io/atlas-acupression/";
 // l'iPhone, compare les numéros de version et recharge si besoin. La
 // lecture « reload » remplace aussi la copie en cache : au prochain
 // lancement, l'app s'ouvre directement sur la nouvelle version.
-const APP_VERSION = "36.4";
+const APP_VERSION = "36.5";
 const verCmp = (a, b) => { const x = a.split(".").map(Number), y = b.split(".").map(Number); for (let i = 0; i < Math.max(x.length, y.length); i++){ const d = (x[i] || 0) - (y[i] || 0); if (d) return d; } return 0; };
 async function checkUpdate(btn){
  const st = $(".ver-st"), say = m => { if (st) st.textContent = m; };
