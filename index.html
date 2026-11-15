@@ -5111,67 +5111,64 @@ function screenPratiquer(){
 }
 
 // ── Onglet Repères ───────────────────────────────────────────
-// Mesure en cun : main schématique vue côté paume, doigts serrés, aux couleurs
-// des figures de l'app (clair et sombre). Les doigts qui servent à la mesure ont
-// un trait plein, les autres un trait léger ; la règle bleue est posée sur le pli
-// de l'articulation du milieu des doigts (ou sur l'articulation du pouce).
+// Mesure en cun : la même main schématique (vue côté paume, doigts serrés) sur les
+// quatre figures, aux couleurs des figures de l'app (clair et sombre). Le pouce ou
+// les doigts qui servent à la mesure sont teintés en bleu ; la règle est posée sur
+// le pli de l'articulation du pouce, ou sur celui du milieu du majeur.
 function cunFig(n){
- const uid = "cf" + n;
- const SK = {line:"var(--fig-line)", crease:"var(--fig-soft)"};
- const defs = `<defs>
-  <linearGradient id="${uid}m" x1="0" x2="0" y1="0" y2="1"><stop offset=".74" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
-  <mask id="${uid}k"><rect width="140" height="170" fill="url(#${uid}m)"/></mask>
- </defs>`;
- const st = `stroke:${SK.line};stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round`;
- const cr = `fill:none;stroke:${SK.crease};stroke-width:1;stroke-linecap:round`;
- // courbe lisse passant par des points (Catmull-Rom → Bézier)
- const smooth = P => { let d = ""; for (let i = 0; i < P.length - 1; i++){ const p0 = P[i - 1] || P[i], p1 = P[i], p2 = P[i + 1], p3 = P[i + 2] || p2;
-   d += ` C${(p1[0] + (p2[0] - p0[0]) / 6).toFixed(2)} ${(p1[1] + (p2[1] - p0[1]) / 6).toFixed(2)} ${(p2[0] - (p3[0] - p1[0]) / 6).toFixed(2)} ${(p2[1] - (p3[1] - p1[1]) / 6).toFixed(2)} ${p2[0].toFixed(2)} ${p2[1].toFixed(2)}`; } return d; };
- // doigt : axe cx, largeur w à la base y0, bout en ytip ; profil avec renflements aux articulations
- const finger = (cx, w, y0, ytip, fade, opts = {}) => {
-  const L = y0 - ytip, pip = y0 - L * .42, dip = y0 - L * .72;
-  const prof = opts.prof || [[0, 1], [.25, .95], [.42, .985], [.57, .9], [.72, .93], [.86, .86]];
-  const sideL = prof.map(([f, k]) => [cx - w * k / 2, y0 - L * f]), sideR = prof.map(([f, k]) => [cx + w * k / 2, y0 - L * f]).reverse();
-  const tw = w * prof[prof.length - 1][1], r = tw / 2, yt = y0 - L * prof[prof.length - 1][0];
-  const top = ` C${cx - r} ${yt - r * 1.25} ${cx + r} ${yt - r * 1.25} ${cx + r} ${yt}`;
-  const outline = `M${sideL[0][0]} ${sideL[0][1]}` + smooth(sideL) + top + smooth(sideR);
-  const fill = outline + " Z";
-  const hw = w * .3;
-  const creases = `<path d="M${cx - hw} ${pip} q${hw} 1.7 ${hw * 2} 0 M${cx - hw * .8} ${pip + 2.3} q${hw * .8} 1.3 ${hw * 1.6} 0 M${cx - hw * .7} ${dip} q${hw * .7} 1.3 ${hw * 1.4} 0" style="${cr}"/>`;
-  return { pip, svg: `<g opacity="${fade ? .35 : 1}"><path d="${fill}" style="fill:var(--fig-paper);stroke:none"/><path d="${outline}" style="fill:none;${st}"/>${opts.extra || creases}</g>` };
- };
- let body = "", bar;
+ // doigts : [gauche, droite, haut] ; index, majeur, annulaire, auriculaire
+ const FG = [[46, 61.5, 27], [61.5, 77.5, 18], [77.5, 92.5, 24], [92.5, 105, 41]], WEB = 79;
+ const r = f => (f[1] - f[0]) / 2;
+ const line = "var(--fig-line)", soft = "var(--fig-soft)", paper = "var(--fig-paper)";
+ const ST = `fill:none;stroke:${line};stroke-width:1.7;stroke-linejoin:round;stroke-linecap:round`;
+ const CR = `fill:none;stroke:${soft};stroke-width:1.1;stroke-linecap:round`;
+ // contour extérieur : index, majeur, annulaire, auriculaire, paume, poignet, pouce
+ const tipArc = (f, from) => `A${r(f)} ${r(f)} 0 0 1 ${f[1]} ${f[2] + r(f)}`;
+ let d = `M46 98 L${FG[0][0]} ${FG[0][2] + r(FG[0])} ${tipArc(FG[0])}`;
+ for (let i = 1; i < 4; i++){ const f = FG[i]; d += ` L${f[0]} ${Math.max(FG[i-1][2], f[2]) + r(f)}`; d += ` L${f[0]} ${f[2] + r(f)} ${tipArc(f)}`; }
+ d += ` L105 82 C107.5 92 109 108 108 124 C107.5 136 106 150 105.5 176 L44.5 176 C44 156 43.5 142 42 136`;
+ d += ` C37 128 29 116 22.5 101 C19 93 15 85 14.5 79.5 C14 72.5 22 70.5 25.5 77 C29 84 33 91 40 95.5 C42.5 97 44.5 97.5 46 98 Z`;
+ // séparations entre les doigts (de l'écart des bouts jusqu'au creux)
+ let sep = "";
+ for (let i = 1; i < 4; i++){ const f = FG[i], y0 = Math.max(FG[i-1][2], f[2]) + Math.min(r(f), r(FG[i-1])); sep += `M${f[0]} ${y0} L${f[0]} ${WEB - 1}`; }
+ // plis : à la racine des doigts, au milieu (articulation) et près du bout
+ const fold = (f, y, k = .62) => { const c = (f[0] + f[1]) / 2, h = (f[1] - f[0]) * k / 2; return `M${c - h} ${y} Q${c} ${y + 1.6} ${c + h} ${y}`; };
+ let crease = "";
+ FG.forEach(f => { const L = WEB - f[2];
+  crease += fold(f, WEB + 1.5, .7) + fold(f, WEB + 4, .55) + fold(f, WEB - L * .40) + fold(f, WEB - L * .40 + 2.6, .5) + fold(f, WEB - L * .70, .5); });
+ // paume : lignes de cœur, de tête et de vie ; pli du pouce
+ crease += `M104 96 C92 92 78 92 66 96 M100 106 C86 101 70 101 58 106 M50 102 C46 114 47 128 54 146`;
+ const IP = [26.4, 92.5], TA = [-.42, -.91];          // articulation du pouce et axe du pouce
+ const TN = [TA[1], -TA[0]];
+ crease += `M${IP[0] - TN[0] * 5.4} ${IP[1] - TN[1] * 5.4} Q${IP[0] + TA[0] * 1.6} ${IP[1] + TA[1] * 1.6} ${IP[0] + TN[0] * 5.4} ${IP[1] + TN[1] * 5.4}`;
+ // teinte bleue sur ce qui sert à la mesure (découpée par la silhouette)
+ let tint = "";
+ const uid = "cun" + n;
  if (n === 1){
-  // pouce gauche vu du dessus : plus court et plus large, ongle, articulation
-  const cx = 70, w = 31, y0 = 172, ytip = 52, L = y0 - ytip;
-  const prof = [[0, 1.02], [.3, .98], [.52, 1.03], [.62, 1], [.8, .97], [.93, .9]];
-  const ip = y0 - L * .52, nt = y0 - L * .93;
-  const nail = `<path d="M${cx - 9} ${nt + 6} C${cx - 9.5} ${nt - 2} ${cx + 9.5} ${nt - 2} ${cx + 9} ${nt + 6} L${cx + 8.4} ${nt + 25} Q${cx} ${nt + 28.5} ${cx - 8.4} ${nt + 25} Z" style="fill:none;stroke:${SK.crease};stroke-width:1"/>
-   <path d="M${cx - 6} ${nt + 22} Q${cx} ${nt + 24.5} ${cx + 6} ${nt + 22}" style="${cr};opacity:.6"/>`;
-  const knuckle = `<path d="M${cx - 8} ${ip - 3} q8 -2.4 16 0 M${cx - 9.5} ${ip + .5} q9.5 -2.2 19 0 M${cx - 7.5} ${ip + 4} q7.5 -2 15 0" style="${cr}"/>`;
-  const f = finger(cx, w, y0, ytip, false, {prof, extra: nail + knuckle});
-  body = f.svg;
-  bar = {x0: cx - w * 1.03 / 2 - 1.5, x1: cx + w * 1.03 / 2 + 1.5, y: ip + .5};
+  tint = `<path d="M31 121 L46.5 98.5 L46.5 60 L0 60 L0 121 Z"/>`;   // partie libre du pouce
  } else {
-  // main gauche côté paume : pouce à gauche, puis index, majeur, annulaire, auriculaire
-  const W = [18, 19, 17.5, 15], TIP = [30, 21, 27, 43], Y0 = [108, 106, 107, 111], used = n;
-  let x = 36; const C = W.map(w => { const c = x + w / 2; x += w; return c; }), xr = x;
-  // paume dessinée après les doigts : elle recouvre leur base, comme sur les planches
-  const top = [[31,128],[34,113],[45,111.5],[64,110.5],[83,111],[xr - 3,113],[xr + 2,121]];
-  const sides = [[xr + 2,121],[xr + 3,150],[xr + 1,176]];
-  const palmFill = `<path d="M31 128${smooth(top)}${smooth(sides)} L36 176${smooth([[36,176],[33,152],[31,128]])} Z" style="fill:var(--fig-paper);stroke:none"/>`;
-  const palmEdge = `<path d="M${xr + 2} 121${smooth(sides)} M36 176${smooth([[36,176],[33,152],[31,128],[34,113]])}" style="fill:none;${st}"/>`;
-  const thumb = `<g opacity=".36"><path d="M34 152${smooth([[34,152],[24,140],[15,124],[11,110],[13,101],[20,100],[25,108],[31,121],[38,132]])}" style="fill:var(--fig-paper);${st}"/></g>`;
-  const F = W.map((w, i) => finger(C[i], w, 120, TIP[i] + (Y0[i] - 106), i >= used));
-  const roots = C.map((c, i) => { const hw = W[i] * .32; return `<path d="M${c - hw} ${113.5} q${hw} 1.4 ${hw * 2} 0 M${c - hw * .85} ${116} q${hw * .85} 1.2 ${hw * 1.7} 0" style="${cr};opacity:${i >= used ? .35 : .8}"/>`; }).join("");
-  const palmLines = `<path d="M38 132 q20 -6 44 -2 M${xr - 32} 125 q16 -3 30 2 M42 166 q12 -16 30 -34" style="${cr};opacity:.5"/>`;
-  body = thumb + F.map(f => f.svg).join("") + palmFill + palmEdge + roots + palmLines;
-  bar = {x0: 36 - .5, x1: 36 + W.slice(0, used).reduce((a, b) => a + b, 0) + .5, y: F[1].pip};
+  const used = FG.slice(0, n);
+  const x0 = used[0][0], x1 = used[used.length - 1][1];
+  tint = `<rect x="${x0}" y="0" width="${x1 - x0}" height="${WEB}"/>`;
  }
- const {x0, x1, y} = bar;
- const rp = `M${x0} ${y} H${x1} M${x0} ${y - 6} V${y + 6} M${x1} ${y - 6} V${y + 6}`;
- const ruler = `<path d="${rp}" style="fill:none;stroke:var(--fig-paper);stroke-width:5.5;stroke-linecap:round"/><path d="${rp}" style="fill:none;stroke:var(--brand);stroke-width:2.6;stroke-linecap:round"/>`;
- return `<svg viewBox="0 0 140 170" aria-hidden="true">${defs}<g mask="url(#${uid}k)">${body}</g>${ruler}</svg>`;
+ // règle
+ let p, q;
+ if (n === 1){ const h = 8.6; p = [IP[0] - TN[0] * h, IP[1] - TN[1] * h]; q = [IP[0] + TN[0] * h, IP[1] + TN[1] * h]; }
+ else { const y = WEB - (WEB - FG[1][2]) * .40, used = FG.slice(0, n); p = [used[0][0], y]; q = [used[used.length - 1][1], y]; }
+ const v = [q[0] - p[0], q[1] - p[1]], lv = Math.hypot(v[0], v[1]), nv = [-v[1] / lv * 5.5, v[0] / lv * 5.5];
+ const rp = `M${p[0]} ${p[1]} L${q[0]} ${q[1]} M${p[0] - nv[0]} ${p[1] - nv[1]} L${p[0] + nv[0]} ${p[1] + nv[1]} M${q[0] - nv[0]} ${q[1] - nv[1]} L${q[0] + nv[0]} ${q[1] + nv[1]}`;
+ const ruler = `<path d="${rp}" style="fill:none;stroke:${paper};stroke-width:5.5;stroke-linecap:round"/><path d="${rp}" style="fill:none;stroke:var(--brand);stroke-width:2.6;stroke-linecap:round"/>`;
+ return `<svg viewBox="4 10 112 150" aria-hidden="true"><defs>
+  <clipPath id="${uid}c"><path d="${d}"/></clipPath>
+  <linearGradient id="${uid}g" x1="0" x2="0" y1="0" y2="1"><stop offset=".78" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  <mask id="${uid}m"><rect x="0" y="0" width="140" height="170" fill="url(#${uid}g)"/></mask></defs>
+  <g mask="url(#${uid}m)">
+   <path d="${d}" style="fill:${paper}"/>
+   <g clip-path="url(#${uid}c)" style="fill:var(--brand);opacity:.16">${tint}</g>
+   <path d="${crease}" style="${CR}"/>
+   <path d="${sep}" style="${ST}"/>
+   <path d="${d}" style="${ST}"/>
+  </g>${ruler}</svg>`;
 }
 const LEXIQUE = [
  ["Qi","L'énergie vitale qui, selon la tradition, anime le corps et circule dans les méridiens."],
@@ -5228,7 +5225,7 @@ const APP_URL = "https://mrguidolin.github.io/atlas-acupression/";
 // l'iPhone, compare les numéros de version et recharge si besoin. La
 // lecture « reload » remplace aussi la copie en cache : au prochain
 // lancement, l'app s'ouvre directement sur la nouvelle version.
-const APP_VERSION = "36.3";
+const APP_VERSION = "36.4";
 const verCmp = (a, b) => { const x = a.split(".").map(Number), y = b.split(".").map(Number); for (let i = 0; i < Math.max(x.length, y.length); i++){ const d = (x[i] || 0) - (y[i] || 0); if (d) return d; } return 0; };
 async function checkUpdate(btn){
  const st = $(".ver-st"), say = m => { if (st) st.textContent = m; };
