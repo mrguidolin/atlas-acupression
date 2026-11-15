@@ -1436,6 +1436,19 @@ html{touch-action:manipulation}
 .how{display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;align-items:start;margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--card);font-size:.9375rem;line-height:1.45}
 .how .msi{font-size:20px;color:var(--warn);margin-top:1px}
 .sci{font-size:.9375rem;line-height:1.5;color:var(--muted);max-width:65ch}
+
+/* v35.9 · Profil réorganisé */
+.inst > b{display:block;font-weight:700;margin-bottom:4px}
+.inst ol{margin:0;padding-left:1.25em;display:grid;gap:4px;font-size:.9375rem;line-height:1.45;color:var(--ink)}
+.inst ol b{font-weight:600}
+.grp .ver-row{margin:0}
+.grp .ver-st:empty{display:none}
+.src-d{margin:28px 0 8px}
+.src-d summary{cursor:pointer;color:var(--brand-ink);font-weight:600;font-size:.9375rem;padding:8px 4px;list-style:none}
+.src-d summary::-webkit-details-marker{display:none}
+.src-d summary::after{content:" ›"}
+.src-d[open] summary::after{content:" ⌄"}
+.src-d .list-card{margin-top:6px}
 </style>
 </head>
 <body>
@@ -5155,7 +5168,7 @@ const APP_URL = "https://mrguidolin.github.io/atlas-acupression/";
 // l'iPhone, compare les numéros de version et recharge si besoin. La
 // lecture « reload » remplace aussi la copie en cache : au prochain
 // lancement, l'app s'ouvre directement sur la nouvelle version.
-const APP_VERSION = "35.8";
+const APP_VERSION = "35.9";
 const verCmp = (a, b) => { const x = a.split(".").map(Number), y = b.split(".").map(Number); for (let i = 0; i < Math.max(x.length, y.length); i++){ const d = (x[i] || 0) - (y[i] || 0); if (d) return d; } return 0; };
 async function checkUpdate(btn){
  const st = $(".ver-st"), say = m => { if (st) st.textContent = m; };
@@ -5184,33 +5197,47 @@ function copyAppUrl(){
  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(APP_URL).then(() => done(true), legacy); else legacy();
 }
 function screenProfil(){
- const favs = S.favs.map(id => BY[id]).filter(Boolean);
  return `<header class="appbar"><h1>Profil</h1></header>
  <p class="lead">Vos réglages. Ils restent sur ce téléphone.</p>
+
+ <h3 class="grp-t">Apparence</h3>
+ <div class="grp"><div class="grp-row col">${segBtns("thm", THEMES, S.theme, "Apparence")}<span class="grp-sub">Auto suit le réglage de votre téléphone.</span></div></div>
+
+ <h3 class="grp-t">Silhouette des schémas</h3>
+ <div class="grp"><div class="grp-row col">${segBtns("sex", [["h","Homme"],["f","Femme"]], S.sex, "Silhouette")}</div></div>
+
+ <h3 class="grp-t">Partager l'app</h3>
  <div class="grp">
-  <div class="grp-row col"><span class="grp-l">Apparence</span>${segBtns("thm", THEMES, S.theme, "Apparence")}<span class="grp-sub">Auto suit le réglage de votre téléphone.</span></div>
-  <div class="grp-row col"><span class="grp-l">Silhouette des schémas</span>${segBtns("sex", [["h","Homme"],["f","Femme"]], S.sex, "Silhouette")}</div>
-  <div class="grp-row col"><span class="grp-l">Son</span><button class="btn btn-soft snd-test" data-act="sound-test"><span class="msi" aria-hidden="true">volume_up</span>Tester le son</button><span class="grp-sub snd-st">Un bol chantant doit sonner. Sinon, montez le volume de l'iPhone et touchez à nouveau.</span></div>
-  <div class="grp-row setting"><span><b>Grossesse en cours</b><small>Signale les points à éviter pendant la grossesse dans les fiches, les listes, les protocoles et les séances guidées, et les retire des séances.</small></span>
-   <button class="switch" role="switch" aria-checked="${S.preg}" aria-label="Grossesse en cours" data-act="preg"></button></div>
+  <div class="grp-row"><div class="share-row"><span class="share-url" id="app-url"><span class="nw">mrguidolin.github.io/</span><wbr><span class="nw">atlas-acupression/</span></span><button class="iconbtn share-copy" data-act="copy-url" aria-label="Copier l'adresse de l'app"><span class="msi" aria-hidden="true">content_copy</span></button></div>
+   <p class="share-sub" aria-live="polite">Copiez l'adresse et envoyez-la. Pour l'avoir comme une app, avec son icône sur l'écran d'accueil :</p></div>
+  <div class="grp-row inst"><b>iPhone</b><ol>
+   <li>Ouvrez l'adresse dans <b>Safari</b>.</li>
+   <li>Touchez le bouton <b>Partager</b> (le carré avec une flèche vers le haut ; selon la version, il se trouve dans le menu <b>···</b>).</li>
+   <li>Choisissez <b>Sur l'écran d'accueil</b>, puis <b>Ajouter</b>.</li></ol></div>
+  <div class="grp-row inst"><b>Android</b><ol>
+   <li>Ouvrez l'adresse dans <b>Chrome</b>.</li>
+   <li>Touchez le menu <b>⋮</b>, en haut à droite.</li>
+   <li>Choisissez <b>Ajouter à l'écran d'accueil</b> (ou <b>Installer l'application</b>), puis confirmez.</li></ol></div>
  </div>
- <div class="sect"><div class="sect-t">Mes points</div>
- ${favs.length ? `<div class="list-card"><ul class="rows">${favs.map(row).join("")}</ul></div>` : `<div class="list-card" style="padding:20px;color:var(--muted);font-size:.92rem">Touchez l'étoile en haut de la fiche d'un point : il apparaîtra ici.</div>`}</div>
- <div class="sect"><div class="sect-t">Mes séances</div>${histHTML()}</div>
- <div class="sect"><div class="sect-t">Partager l'app</div>
- <div class="list-card share-card"><div class="share-row"><span class="share-url" id="app-url"><span class="nw">mrguidolin.github.io/</span><wbr><span class="nw">atlas-acupression/</span></span><button class="iconbtn share-copy" data-act="copy-url" aria-label="Copier l'adresse de l'app"><span class="msi" aria-hidden="true">content_copy</span></button></div>
- <p class="share-sub" aria-live="polite">Copiez l'adresse et envoyez-la : la personne l'ouvre dans Safari, puis Partager › Sur l'écran d'accueil.</p></div></div>
- ${GC_ON ? `<p class="fine" style="text-align:left;margin:4px 16px 0">Statistiques de visite anonymes, sans cookie ni donnée personnelle (GoatCounter).</p>` : ""}
- <div class="sect"><div class="sect-t">Sources</div>
+
+ <h3 class="grp-t">Version</h3>
+ <div class="grp"><div class="grp-row"><div class="ver-row"><span><b>Version ${APP_VERSION}</b></span><button class="ver-btn" data-act="check-update">${msi("refresh")}<span>Mettre à jour</span></button></div>
+  <p class="ver-st" aria-live="polite"></p></div></div>
+
+ <h3 class="grp-t">Grossesse</h3>
+ <div class="grp"><div class="grp-row setting"><span><b>Grossesse en cours</b><small>Signale les points à éviter pendant la grossesse dans les fiches, les listes, les protocoles et les séances guidées, et les retire des séances.</small></span>
+   <button class="switch" role="switch" aria-checked="${S.preg}" aria-label="Grossesse en cours" data-act="preg"></button></div></div>
+
+ <details class="src-d"><summary>Sources et crédits</summary>
  <div class="list-card prose" style="padding:16px 16px 4px;font-size:.94rem">
   <p><b>Emplacement des points.</b> Norme internationale de l'OMS (2008). Quand une école place un point ailleurs, la fiche le dit.</p>
   <p><b>Fonctions.</b> Médecine traditionnelle chinoise, d'après Deadman, <em>A Manual of Acupuncture</em>, et Maciocia, <em>Les principes fondamentaux de la médecine chinoise</em>.</p>
   <p><b>Preuves.</b> Les fonctions décrites viennent de la tradition. Elles ne sont pas démontrées par la science, sauf mention contraire, comme pour MC 6 et les nausées après une opération.</p>
   ${PL.man && PL.man.credit ? `<p><b>Illustrations.</b> ${plEsc(PL.man.credit)}</p>` : ""}
   <p><b>Sons.</b> Enregistrements libres de droits, adaptés pour boucler sans coupure. Pluie : <a href="https://freesound.org/people/alex36917/sounds/524605/" target="_blank" rel="noopener">alex36917</a> ; vagues : <a href="https://freesound.org/people/Luftrum/sounds/48412/" target="_blank" rel="noopener">Luftrum</a> (Freesound, licence CC BY) ; oiseaux : kvgarlic ; ruisseau : gluckose (CC0), via l'application Blanket. Forêt, feu de bois, grillons, carillon, tonnerre, chouette et bol chantant : via l'application Moodist (CC0 ou licence Pixabay). Piano : échantillons d'un vrai piano, <a href="https://versilian-studios.com/vsco-community/" target="_blank" rel="noopener">Versilian Studios, VSCO 2 Community Edition</a> (domaine public, CC0) ; la mélodie a été composée pour l'app. Le bol de la respiration est le même bol chantant enregistré. La nappe et le bip sont fabriqués par l'app.</p>
- </div></div>
- <div class="ver-row"><p class="fine">Version ${APP_VERSION}.</p><button class="ver-btn" data-act="check-update">${msi("refresh")}<span>Mettre à jour</span></button></div>
- <p class="ver-st" aria-live="polite"></p>`;
+ </div>
+ ${GC_ON ? `<p class="fine" style="text-align:left;margin:8px 4px 0">Statistiques de visite anonymes, sans cookie ni donnée personnelle (GoatCounter).</p>` : ""}
+ </details>`;
 }
 
 // ── Premier lancement : choix de la silhouette ───────────────
