@@ -3672,17 +3672,18 @@ document.addEventListener("touchmove", e => { if (e.touches && e.touches.length 
 // Sons de la séance guidée.
 // Nature et bols : vrais enregistrements libres de droits (dossier
 // sons/, voir Profil › Sources), bouclés sans coupure.
-// Piano, nappe et bruits : synthétisés (Web Audio).
+// Piano : vrai piano enregistré (VSCO 2, CC0), pièce composée pour l'app.
+// Nappe et sons de respiration : fabriqués pour l'app.
 // ─────────────────────────────────────────────────────────────
 const AMB_GROUPS = [
  ["Nature", [["forest","Forêt","forest"],["rain","Pluie","rainy"],["storm","Orage","thunderstorm"],["waves","Vagues","waves"],
              ["stream","Ruisseau","water"],["night","Nuit d'été","nights_stay"],["fire","Feu de bois","local_fire_department"]]],
- ["Méditation", [["bowl","Bols chantants","self_improvement"],["chimes","Carillon","notifications"],["piano","Piano doux","piano"],["pad","Nappe douce","spa"]]],
- ["Bruits", [["none","Aucune","volume_off"],["white","Bruit blanc","graphic_eq"],["brown","Bruit doux","air"]]]
+ ["Méditation", [["bowl","Bols chantants","self_improvement"],["chimes","Carillon","notifications"],["piano","Piano","piano"],["pad","Nappe douce","spa"]]],
+ ["Sans ambiance", [["none","Aucune","volume_off"]]]
 ];
 const AMBIENCES = AMB_GROUPS.flatMap(([, l]) => l);
-const SIGNALS = [["bip","Bip"],["bell","Cloche"],["bowl","Bol"],["none","Silence"]];
-const SND = { ac:null, master:null, ambBus:null, rev:null, cur:null, buf:{}, files:{}, previewT:0, muted:false, vol:.7 };
+const SIGNALS = [["bip","Oui"],["none","Non"]];
+const SND = { ac:null, master:null, ambBus:null, rev:null, cur:null, curKey:null, buf:{}, files:{}, previewT:0, muted:false, vol:.7, born:0, stale:false, watchT:0 };
 const SND_DIR = "sons/";
 
 // Sur iPhone, le son Web Audio est coupé par le mode silencieux. Jouer en
@@ -3699,6 +3700,7 @@ function mediaUnlock(){
    document.body.appendChild(MEDIA);
   }
   clearTimeout(MEDIA_T);
+  if (MEDIA.error){ try { MEDIA.remove(); } catch(e) {} MEDIA = null; return mediaUnlock(); }
   const p = MEDIA.play(); if (p && p.catch) p.catch(e => { SND.err = "Lecture refusée (" + (e && e.name || "?") + ")"; });
  } catch(e) { SND.err = String(e && e.message || e); }
 }
@@ -3707,16 +3709,51 @@ function mediaRelease(){
  clearTimeout(MEDIA_T);
  MEDIA_T = setTimeout(() => { if (!SND.cur && !soundBusy() && MEDIA) { try { MEDIA.pause(); } catch(e) {} } }, 5000);
 }
+// Sur iPhone, après un appel, le verrouillage, une autre app qui joue du
+// son ou un long silence, le moteur audio peut rester « en pause » ou
+// figé, même s'il se dit actif. Il ne repart alors plus jamais. Dans ce
+// cas on le jette et on en crée un neuf, pendant le toucher de l'utilisateur
+// (seul moment où iOS l'autorise), puis on relance l'ambiance en cours.
+function audioDrop(){
+ const old = SND.ac; if (!old) return;
+ if (SND.cur){ try { SND.cur.stop(.01); } catch(e) {} SND.cur = null; }
+ SND.ac = null; SND.master = SND.ambBus = SND.sig = SND.brBus = null;
+ SND.buf = {}; SND.ir = null; SND.stale = false;
+ Object.keys(SND.files).forEach(k => { if (SND.files[k] instanceof Promise) delete SND.files[k]; });
+ try { old.close(); } catch(e) {}
+}
+function audioWatch(){
+ const ac = SND.ac; if (!ac) return;
+ const a0 = ac.currentTime, p0 = performance.now();
+ clearTimeout(SND.watchT);
+ SND.watchT = setTimeout(() => {
+  if (SND.ac !== ac) return;
+  const dt = (performance.now() - p0) / 1000;
+  if (ac.state !== "running" || ac.currentTime - a0 < dt * .3) SND.stale = true;
+ }, 700);
+}
 function audioInit(){
  try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch(e) {}
  mediaUnlock();
- if (SND.ac){ if (SND.ac.state !== "running") SND.ac.resume().catch(() => {}); return SND.ac; }
+ let ac = SND.ac;
+ if (ac && (SND.stale || ac.state === "closed" || ac.state === "interrupted" || (ac.state === "suspended" && performance.now() - SND.born > 1500))){
+  const key = SND.curKey && SND.cur ? SND.curKey : null;
+  audioDrop(); ac = null;
+  if (!audioBuild()) return null;
+  if (key) SND.cur = makeAmbience(key, 1.5);
+  audioWatch(); return SND.ac;
+ }
+ if (ac){ if (ac.state !== "running") ac.resume().catch(() => {}); audioWatch(); return ac; }
+ if (!audioBuild()) return null;
+ audioWatch(); return SND.ac;
+}
+function audioBuild(){
  const AC = window.AudioContext || window.webkitAudioContext; if (!AC){ SND.err = "Web Audio indisponible"; return null; }
  try {
-  const ac = SND.ac = new AC();
+  const ac = SND.ac = new AC(); SND.born = performance.now();
   const comp = ac.createDynamicsCompressor(); comp.threshold.value = -10; comp.ratio.value = 3; comp.connect(ac.destination);
   SND.master = ac.createGain(); SND.master.gain.value = .9; SND.master.connect(comp);
-  SND.ambBus = ac.createGain(); SND.ambBus.gain.value = SND.vol; SND.ambBus.connect(SND.master);
+  SND.ambBus = ac.createGain(); SND.ambBus.gain.value = SND.muted ? 0 : SND.vol; SND.ambBus.connect(SND.master);
   const b = ac.createBuffer(1, 1, 22050), s = ac.createBufferSource(); s.buffer = b; s.connect(ac.destination); s.start(0);
   if (ac.state !== "running") ac.resume().catch(() => {});
   return ac;
@@ -3724,8 +3761,12 @@ function audioInit(){
 }
 // Relance le son après une interruption (appel, verrouillage…), au premier toucher.
 ["touchend", "click"].forEach(ev => document.addEventListener(ev, () => {
- if (SND.ac && SND.ac.state !== "running") { SND.ac.resume().catch(() => {}); mediaUnlock(); }
+ if (SND.ac && (SND.stale || SND.ac.state !== "running")) audioInit();
 }, {capture:true, passive:true}));
+// Retour dans l'app : on vérifie que le son tourne encore.
+const audioBack = () => { if (document.visibilityState !== "visible" || !SND.ac) return; if (SND.ac.state !== "running") { SND.ac.resume().catch(() => {}); SND.stale = true; } else audioWatch(); if (soundBusy() || SND.cur) mediaUnlock(); };
+document.addEventListener("visibilitychange", audioBack);
+window.addEventListener("pageshow", audioBack);
 function soundStatus(){
  const files = Object.keys(SND.files).filter(k => !(SND.files[k] instanceof Promise)).length;
  if (!SND.ac) return SND.err || "Pas encore testé.";
@@ -3811,7 +3852,7 @@ function hushBus(k){
 function soundHushAll(){
  clearTimeout(SND.previewT);
  if (SND.cur){ SND.cur.stop(.025); SND.cur = null; }
- hushBus("sig"); hushBus("brBus");
+ hushBus("sig"); if (typeof brFade === "function") brFade(.4); else hushBus("brBus");
  mediaRelease();
 }
 function nz(type, dest, gain){ const ac = SND.ac, s = ac.createBufferSource(); s.buffer = noiseBuf(type); s.loop = true; const g = ac.createGain(); g.gain.value = gain; s.connect(g); g.connect(dest); s.start(0, Math.random() * 3.5); return s; }
@@ -3825,23 +3866,13 @@ function tone(dest, f, t0, dur, peak, type, attack){
  o.connect(g); g.connect(dest); o.start(t0); o.stop(t0 + dur + .05);
  return o;
 }
-// note de piano électrique douce (synthèse FM)
-function epNote(dest, f, t, vel, len){
- const ac = SND.ac, c = ac.createOscillator(), m = ac.createOscillator(), mg = ac.createGain(), g = ac.createGain();
- c.frequency.value = f; m.frequency.value = f; m.connect(mg); mg.connect(c.frequency);
- mg.gain.setValueAtTime(f * 1.4, t); mg.gain.exponentialRampToValueAtTime(f * .08, t + 1.6);
- g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vel, t + .008);
- g.gain.exponentialRampToValueAtTime(vel * .35, t + .9); g.gain.exponentialRampToValueAtTime(.0001, t + len);
- c.connect(g); g.connect(dest); c.start(t); m.start(t); c.stop(t + len + .1); m.stop(t + len + .1);
- tone(dest, f * 2, t, 1.4, vel * .12, "sine", .006);
-}
 const rnd = (a, b) => a + Math.random() * (b - a);
 const pick = a => a[Math.floor(Math.random() * a.length)];
 
 // ── Ambiances ────────────────────────────────────────────────
 // Une ambiance = {out, stop}. Les enregistrements se chargent à la
 // demande ; le son monte en douceur dès qu'il est prêt.
-const AMB_FILES = {forest:["forest-birds","forest-birds2","forest-wind"], rain:["rain"], storm:["rain","thunder1","thunder2","thunder3"], waves:["waves"], stream:["stream"], night:["crickets","owl","forest-wind"], fire:["fire"], chimes:["chimes"], bowl:["bowl"]};
+const AMB_FILES = {forest:["forest-birds","forest-birds2","forest-wind"], rain:["rain"], storm:["rain","thunder1","thunder2","thunder3"], waves:["waves"], stream:["stream"], night:["crickets","owl","forest-wind"], fire:["fire"], chimes:["chimes"], bowl:["bowl"], piano:["piano"]};
 function makeAmbience(key, fade, onReady){
  const ac = SND.ac, post = ac.createGain(); post.gain.value = .0001; post.connect(SND.ambBus);
  const out = ac.createGain(); out.connect(post);
@@ -3851,7 +3882,7 @@ function makeAmbience(key, fade, onReady){
  const ready = () => { if (!alive || readyDone) return; readyDone = true; const t = ac.currentTime; post.gain.cancelScheduledValues(t); post.gain.setValueAtTime(.0001, t); post.gain.exponentialRampToValueAtTime(1, t + fade); onReady && onReady(); };
  const loop = (fn, a, b, first) => { const go = () => { if (!alive) return; fn(); timers.push(setTimeout(go, rnd(a, b))); }; timers.push(setTimeout(go, first != null ? first : rnd(0, a))); };
  const wet = amt => { conv = conv || convTo(post, .5); const s = ac.createGain(); s.gain.value = amt; out.connect(s); s.connect(conv); return s; };
- const fallback = () => { if (alive) synthAmbience(key, out, nodes, loop, wet); ready(); };
+ const fallback = () => { if (alive && key !== "piano") synthAmbience(key, out, nodes, loop, wet); ready(); };
  const files = AMB_FILES[key];
  if (!files){ synthAmbience(key, out, nodes, loop, wet); ready(); }
  else Promise.all(files.map(loadSample)).then(B => {
@@ -3898,12 +3929,7 @@ function makeAmbience(key, fade, onReady){
 // Ambiances synthétisées (et secours si un enregistrement ne charge pas)
 function synthAmbience(key, out, nodes, loop, wet){
  const ac = SND.ac;
- if (key === "white"){
-  nodes.push(nz("white", filt("lowpass", 7000, .5, out), .5));
- } else if (key === "brown"){
-  nodes.push(nz("brown", filt("lowpass", 900, .5, out), .9));
-  nodes.push(nz("pink", filt("lowpass", 3000, .5, out), .15));
- } else if (key === "pad"){
+ if (key === "pad"){
   const lp = filt("lowpass", 1300, .7, out); nodes.push(lfo(.045, 450, lp.frequency, 1300));
   wet(.7);
   // Fa maj7 → Do/Mi → Ré m9 → Si♭ maj7, très lent
@@ -3921,25 +3947,6 @@ function synthAmbience(key, out, nodes, loop, wet){
     });
    });
   }, 12000, 12000, 50);
- } else if (key === "piano"){
-  const dry = ac.createGain(); dry.gain.value = 1; dry.connect(out);
-  wet(.9);
-  // accords lents (main gauche) et mélodie pentatonique (main droite)
-  const CH = [[130.81,164.81,196.00,246.94],[110.00,130.81,164.81,196.00],[87.31,130.81,164.81,220.00],[98.00,146.83,196.00,220.00]];
-  const MEL = [523.25,587.33,659.25,783.99,880.00,1046.50,1174.66];
-  const beat = 1.15; let bar = 0, mi = 3, next = ac.currentTime + .1;
-  const playBar = () => {
-   const ch = CH[bar++ % CH.length], t0 = Math.max(next, ac.currentTime + .05);
-   ch.forEach((f, j) => epNote(dry, f, t0 + j * .09, .05, 5.5));
-   for (let b = 0; b < 4; b++){
-    if (Math.random() < .55){
-     mi = Math.max(0, Math.min(MEL.length - 1, mi + pick([-2, -1, -1, 0, 1, 1, 2])));
-     epNote(dry, MEL[mi], t0 + b * beat + (b ? rnd(-.03, .05) : .25), rnd(.035, .06), 4);
-    }
-   }
-   next = t0 + beat * 4;
-  };
-  loop(playBar, beat * 4000, beat * 4000, 50);
  } else if (key === "rain" || key === "storm"){
   nodes.push(nz("pink", filt("highpass", 450, .5, filt("lowpass", 7500, .5, out)), .9));
   nodes.push(nz("brown", filt("lowpass", 350, .7, out), .35));
@@ -3954,6 +3961,7 @@ function synthAmbience(key, out, nodes, loop, wet){
 function ambStart(key, fade = 3, onReady){
  if (!audioInit()) return;
  ambStop(.8);
+ SND.curKey = key;
  if (!key || key === "none") return;
  SND.cur = makeAmbience(key, fade, onReady);
 }
@@ -3965,27 +3973,16 @@ function ambPreview(key){
  ambStart(key, 1.2, () => { clearTimeout(SND.previewT); SND.previewT = setTimeout(() => ambStop(2), 9000); });
 }
 function preloadFor(key){ if (audioInit()) (AMB_FILES[key] || []).forEach(n => loadSample(n).catch(() => {})); }
-// Signal de début (n = 1) ou de fin (n = 2) d'un point
+// Bip simple au début et à la fin de chaque pression (si activé)
 function signal(kind, n){
  if (navigator.vibrate) { try { navigator.vibrate(n > 1 ? [120, 80, 120] : 150); } catch(e) {} }
  if (kind === "none" || !SND.ac) return;
- const ac = SND.ac, t = ac.currentTime + .02;
  try {
-  const bowl = SND.files.bowl;
-  if (kind === "bip"){
-   for (let k = 0; k < n; k++) tone(bus("sig"), n > 1 ? 880 : 660, t + k * .22, .18, .25);
-  } else if (kind === "bowl" && bowl && !(bowl instanceof Promise)){
-   for (let k = 0; k < n; k++){
-    const t0 = t + k * .6, src = ac.createBufferSource(), g = ac.createGain();
-    src.buffer = bowl; src.playbackRate.value = k ? 1.335 : 1;
-    g.gain.setValueAtTime(.55, t0); g.gain.setValueAtTime(.55, t0 + 3.5); g.gain.exponentialRampToValueAtTime(.0001, t0 + 7);
-    src.connect(g); g.connect(bus("sig")); src.start(t0); src.stop(t0 + 7.1);
-   }
-  } else {
-   if (kind === "bowl") loadSample("bowl").catch(() => {});
-   const notes = n > 1 ? [523.25, 783.99] : [659.25];
-   notes.forEach((f, k) => [[1,1,2.6],[2.76,.35,1.4],[5.4,.12,.7]].forEach(([r, a, d]) => tone(bus("sig"), f * r, t + k * .38, d, .16 * a, "sine", .005)));
-  }
+  const ac = SND.ac, t = ac.currentTime + .02, o = ac.createOscillator(), g = ac.createGain();
+  o.type = "sine"; o.frequency.value = 880;
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.22, t + .012);
+  g.gain.setValueAtTime(.22, t + .11); g.gain.exponentialRampToValueAtTime(.0001, t + .26);
+  o.connect(g); g.connect(bus("sig")); o.start(t); o.stop(t + .3);
  } catch(e) {}
 }
 
@@ -4008,6 +4005,7 @@ function sessOpts(){
  const o = Object.assign({dur:60, pause:10, sides:"seq", signal:"bip", amb:"none", vol:.7}, S.sess || {});
  if (!AMBIENCES.some(a => a[0] === o.amb)) o.amb = o.amb === "melody" ? "piano" : "none";
  if (o.sound === false && !S.sess.signal) o.signal = "none";
+ if (o.signal !== "none") o.signal = "bip";
  delete o.sound;
  return o;
 }
@@ -4098,7 +4096,7 @@ function setupHTML(){
 
   <h3 class="grp-t">Son</h3>
   <div class="grp">
-   <div class="grp-row col"><span class="grp-l">Signal entre les points</span>${segc("signal", SIGNALS, o.signal, "Signal entre les points")}</div>
+   <div class="grp-row col"><span class="grp-l">Bip entre les points</span>${segc("signal", SIGNALS, o.signal, "Bip entre les points")}</div>
    <div class="grp-row col"><span class="grp-l">Ambiance de fond</span>${amb}</div>
    <div class="grp-row vol-row${o.amb === "none" ? " is-off" : ""}">${msi("volume_down")}<input class="vol" type="range" min="0" max="1" step="0.05" value="${o.vol}" data-s="vol" aria-label="Volume de l'ambiance">${msi("volume_up")}</div>
   </div>
@@ -4115,7 +4113,7 @@ function setupAction(t, sheet){
   o[k] = v;
   if (k === "dur") SU.list.forEach(r => r.dur = v);
   if (k === "amb"){ audioInit(); ambVolume(o.vol); ambPreview(v); }
-  if (k === "signal"){ audioInit(); if (v === "bowl") loadSample("bowl").then(() => signal(v, 2)).catch(() => signal(v, 2)); else signal(v, 2); }
+  if (k === "signal"){ audioInit(); signal(v, 1); }
   saveOpts();
  }
  else if (a === "tog") SU.list[i].on = !SU.list[i].on;
@@ -4147,7 +4145,6 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
 // ── Lecteur ──────────────────────────────────────────────────
 function startSession(){
  audioInit(); clearTimeout(SND.previewT); ambStop(.3); ambMute(false); ambVolume(SU.opts.vol);
- if (SU.opts.signal === "bowl") loadSample("bowl").catch(() => {});
  const steps = buildSteps(); if (!steps.length) return;
  SS = { steps, i:0, phase:"find", paused:false, end:0, len:0, remaining:0, t0:Date.now(), el:null, timer:null, after:null, drawn:-1 };
  SS.el = push(`<div class="sess-wrap"></div>`, e => { e.dataset.sess = "play"; e.classList.add("sheet-play"); }, "modal");
@@ -4323,8 +4320,9 @@ function histHTML(){
 // Respiration guidée (cohérence cardiaque).
 // Deux écrans : les réglages (rythme, durée, son), puis la séance,
 // où une grande sphère monte à l'inspiration et descend à
-// l'expiration. Un coup de bol bref marque chaque changement ; tout
-// se coupe net à l'arrêt ou en quittant la page.
+// l'expiration. Un son de bol tenu, qui vibre doucement, accompagne
+// toute l'inspiration puis toute l'expiration (plus grave), avec des
+// fondus enchaînés ; à la fin il s'éteint lentement.
 // ─────────────────────────────────────────────────────────────
 const BR_MODES = [
  ["equilibrer", "Équilibrer", 5, 5],
@@ -4351,7 +4349,7 @@ const brEase = p => .5 - Math.cos(Math.PI * Math.max(0, Math.min(1, p))) / 2;
 const brDur = s => `${Math.floor(s / 60)} min${s % 60 ? " 30" : ""}`;
 
 function openBreath(mode){
- audioInit(); loadSample("bowl-cue").catch(() => {});
+ audioInit(); loadSample("souffle").catch(() => {});
  const o = breathOpts(); if (mode) o.mode = mode;
  BR = {o, state:"idle", t0:0, pausedT:0, total:0, phase:null, cycles:0, raf:0, timer:0, el:null};
  BR.el = push(breathHTML(), el => { el.dataset.breath = "1"; el.classList.add("breath"); }, "modal");
@@ -4436,7 +4434,7 @@ function brView(){
 
 // ── Déroulé ──────────────────────────────────────────────────
 function brStart(){
- audioInit(); loadSample("bowl-cue").catch(() => {});
+ audioInit(); loadSample("souffle").catch(() => {});
  const r = breathRhythm(BR.o), cyc = (r.inh + r.exh) * 1000;
  BR.r = r; BR.total = Math.ceil(BR.o.secs * 1000 / cyc) * cyc;
  BR.state = "run"; BR.t0 = performance.now() + BR_LEAD; BR.phase = null; BR.cycles = 0;
@@ -4450,7 +4448,13 @@ function brTick(){
  const t = brElapsed();
  if (t >= BR.total){ brFinish(BR.total); return; }
  const v = brView();
- if (!v.lead && v.ph !== BR.phase){ BR.phase = v.ph; if (v.ph === "in") BR.cycles++; brCue(v.ph); }
+ if (!v.lead && v.ph !== BR.phase){
+  const resumed = BR.phase === "resume"; BR.phase = v.ph;
+  if (v.ph === "in" && !resumed) BR.cycles++;
+  const r = BR.r, cyc = (r.inh + r.exh) * 1000, tc = t % cyc;
+  const left = (v.ph === "in" ? r.inh * 1000 - tc : cyc - tc) / 1000;
+  if (left > .6) brTone(v.ph, left);
+ }
  const rem = BR.el.querySelector(".br-rem"); if (rem && rem.textContent !== v.rem) rem.textContent = v.rem;
 }
 function brFrame(){
@@ -4467,27 +4471,50 @@ function brFrame(){
  }
  BR.raf = requestAnimationFrame(brFrame);
 }
-// Coup de bol bref et mat : le même bol, un peu plus grave à l'expiration.
-function brCue(ph){
+// Son tenu de bol chantant pendant toute la phase : il monte en douceur,
+// vibre, puis s'éteint lentement en se fondant dans la phase suivante.
+// Expiration une quarte plus bas.
+const BR_FADE_OUT = 1.6;
+function brTone(ph, dur){
  if (navigator.vibrate) { try { navigator.vibrate(20); } catch(e) {} }
- if (!BR.o.sound || !SND.ac) return;
- const ac = SND.ac, t = ac.currentTime + .01, dest = bus("brBus"), b = SND.files["bowl-cue"];
+ if (!BR || !BR.o.sound || !SND.ac) return;
+ const ac = SND.ac, t = ac.currentTime + .02, b = SND.files.souffle;
+ const rate = ph === "in" ? 1 : .749, peak = ph === "in" ? .7 : .78;
+ const up = Math.min(1.4, dur * .35), down = Math.min(BR_FADE_OUT, dur * .45), end = t + dur + .5;
  try {
+  const g = ac.createGain(), env = g.gain;
+  env.setValueAtTime(0, t);
+  env.linearRampToValueAtTime(peak * (ph === "in" ? .8 : 1), t + up);
+  env.linearRampToValueAtTime(peak * (ph === "in" ? 1 : .8), t + dur - down);
+  // descente en cosinus : pas de chute brusque, se termine à zéro
+  const N = 32, curve = new Float32Array(N), from = peak * (ph === "in" ? 1 : .8);
+  for (let k = 0; k < N; k++) curve[k] = from * Math.pow(Math.cos(k / (N - 1) * Math.PI / 2), 2);
+  env.setValueCurveAtTime(curve, t + dur - down + .002, down + .5);
+  g.connect(bus("brBus"));
   if (b && !(b instanceof Promise)){
-   const s = ac.createBufferSource(), g = ac.createGain();
-   s.buffer = b; s.playbackRate.value = ph === "in" ? 1 : .794;
-   g.gain.value = ph === "in" ? .8 : .9;
-   s.connect(g); g.connect(dest); s.start(t);
+   const s = ac.createBufferSource(); s.buffer = b; s.playbackRate.value = rate;
+   s.connect(g); s.start(t, 1.5); s.stop(end + .05);
   } else {
-   const f = ph === "in" ? 225 : 178.6;
-   [[1, 1, 1.6], [1.99, .35, .9], [3.22, .12, .5]].forEach(([k, a, d]) => tone(dest, f * k, t, d, .2 * a, "sine", .006));
+   // secours : synthèse directe du même bol (doublets qui battent)
+   const f = 196 * rate;
+   [[1, 1, .75], [2.71, .38, 1.35], [5.15, .11, 2.1]].forEach(([r, a, bt]) => [[-bt / 2, a], [bt / 2, a * .4]].forEach(([d, amp]) => {
+    const o = ac.createOscillator(), og = ac.createGain(); o.frequency.value = f * r + d; og.gain.value = amp * .16;
+    o.connect(og); og.connect(g); o.start(t); o.stop(end + .05);
+   }));
   }
  } catch(e) {}
 }
-function brHush(){ hushBus("brBus"); }
+// Fondu de sortie du son de respiration (pause, fin, fermeture)
+function brFade(sec){
+ const b = SND.brBus; if (!b || !SND.ac) return; SND.brBus = null;
+ const t = SND.ac.currentTime;
+ try { b.gain.cancelScheduledValues(t); b.gain.setValueAtTime(b.gain.value, t); b.gain.setTargetAtTime(0, t, sec / 4); } catch(e) {}
+ setTimeout(() => { try { b.disconnect(); } catch(e) {} }, sec * 1000 + 300);
+}
+function brHush(){ brFade(.35); }
 function brFinish(t){
  BR.doneT = t; BR.state = "done"; keepAwake(false);
- brHush(); mediaRelease();
+ brFade(t >= BR.total ? 3 : .8); mediaRelease();
  if (t >= 60000){
   S.hist.push({t:Date.now(), ref:"breath:" + BR.o.mode, name:"Respiration · " + breathRhythm(BR.o).name, dur:Math.round(t / 1000), n:0});
   S.hist = S.hist.slice(-50); save();
@@ -4507,13 +4534,14 @@ function breathAction(t){
  if (a === "dur"){ keep(() => { o.secs = Math.max(BR_SEC_MIN, Math.min(BR_SEC_MAX, o.secs + +t.dataset.d)); }); return refocus(`[data-b="dur"][data-d="${t.dataset.d}"]`); }
  if (a === "sound"){
   keep(() => { o.sound = !o.sound; }); refocus('[data-b="sound"]');
-  if (o.sound){ audioInit(); loadSample("bowl-cue").then(() => brCue("in")).catch(() => brCue("in")); }
+  if (o.sound){ audioInit(); const demo = () => { brTone("in", 3.5); }; loadSample("souffle").then(demo).catch(demo); }
+  else brHush();
   return;
  }
  if (a === "start") return brStart();
  if (a === "pause"){
-  if (BR.state === "run"){ BR.pausedT = brElapsed(); BR.state = "paused"; keepAwake(false); brHush(); }
-  else { BR.t0 = performance.now() - BR.pausedT; BR.state = "run"; keepAwake(true); }
+  if (BR.state === "run"){ BR.pausedT = brElapsed(); BR.state = "paused"; keepAwake(false); brFade(.8); }
+  else { audioInit(); BR.t0 = performance.now() - BR.pausedT; BR.state = "run"; if (BR.phase) BR.phase = "resume"; keepAwake(true); }
   brRender(); brTick(); refocus('[data-b="pause"]'); return;
  }
  if (a === "stop") return brFinish(Math.max(0, brElapsed()));
@@ -5057,9 +5085,9 @@ function screenProfil(){
   <p><b>Fonctions.</b> Médecine traditionnelle chinoise, d'après Deadman, <em>A Manual of Acupuncture</em>, et Maciocia, <em>Les principes fondamentaux de la médecine chinoise</em>.</p>
   <p><b>Preuves.</b> Les fonctions décrites viennent de la tradition. Elles ne sont pas démontrées par la science, sauf mention contraire, comme pour MC 6 et les nausées après une opération.</p>
   ${PL.man && PL.man.credit ? `<p><b>Illustrations.</b> ${plEsc(PL.man.credit)}</p>` : ""}
-  <p><b>Sons.</b> Enregistrements libres de droits, adaptés pour boucler sans coupure. Pluie : <a href="https://freesound.org/people/alex36917/sounds/524605/" target="_blank" rel="noopener">alex36917</a> ; vagues : <a href="https://freesound.org/people/Luftrum/sounds/48412/" target="_blank" rel="noopener">Luftrum</a> (Freesound, licence CC BY) ; oiseaux : kvgarlic ; ruisseau : gluckose (CC0), via l'application Blanket. Forêt, feu de bois, grillons, carillon, tonnerre, chouette et bol chantant : via l'application Moodist (CC0 ou licence Pixabay). Le piano, la nappe et les bruits sont fabriqués par l'app.</p>
+  <p><b>Sons.</b> Enregistrements libres de droits, adaptés pour boucler sans coupure. Pluie : <a href="https://freesound.org/people/alex36917/sounds/524605/" target="_blank" rel="noopener">alex36917</a> ; vagues : <a href="https://freesound.org/people/Luftrum/sounds/48412/" target="_blank" rel="noopener">Luftrum</a> (Freesound, licence CC BY) ; oiseaux : kvgarlic ; ruisseau : gluckose (CC0), via l'application Blanket. Forêt, feu de bois, grillons, carillon, tonnerre, chouette et bol chantant : via l'application Moodist (CC0 ou licence Pixabay). Piano : échantillons d'un vrai piano, <a href="https://versilian-studios.com/vsco-community/" target="_blank" rel="noopener">Versilian Studios, VSCO 2 Community Edition</a> (domaine public, CC0) ; la mélodie a été composée pour l'app. La nappe, le bip et le bol de la respiration sont fabriqués par l'app.</p>
  </div></div>
- <p class="fine">Version 34.9.</p>`;
+ <p class="fine">Version 35.0.</p>`;
 }
 
 // ── Premier lancement : choix de la silhouette ───────────────
