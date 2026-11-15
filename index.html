@@ -1425,6 +1425,12 @@ html{touch-action:manipulation}
 .sx-adv-t .msi{color:var(--muted)}
 .sx-adv{border-radius:0 0 14px 14px;border-top:1px solid var(--hair)}
 .sx-note{color:var(--muted);font-size:.875rem;line-height:1.4}
+
+/* v35.7 · résumé homogène */
+.sx-stats{display:grid;grid-template-columns:repeat(3,1fr);background:var(--card);border-radius:14px}
+.sx-stats span{display:grid;justify-items:center;gap:2px;padding:12px 6px;color:var(--muted);font-size:.875rem}
+.sx-stats span+span{border-left:1px solid var(--hair)}
+.sx-stats b{color:var(--ink);font-size:1.125rem;font-weight:700;font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
@@ -4162,9 +4168,10 @@ function setupHTML(){
   <p class="eyebrow" style="color:var(--c-${cat.k})">${cat.name}</p>
   <h1 class="h1d">${it.name}</h1>
 
-  <div class="sx-hero">
-   <div class="sx-time"><b>${fmtTotal(total)}</b><span>${n} point${n > 1 ? "s" : ""} · ${steps.length} étape${steps.length > 1 ? "s" : ""}</span></div>
-   <p class="sx-ids">${ids.join(" · ")}</p>
+  <div class="sx-stats">
+   <span><b>${fmtTotal(total)}</b>en tout</span>
+   <span><b>${n}</b>point${n > 1 ? "s" : ""}</span>
+   <span><b>${steps.length}</b>étape${steps.length > 1 ? "s" : ""}</span>
   </div>
 
   <h3 class="grp-t">Durée par point</h3>
@@ -5143,7 +5150,7 @@ const APP_URL = "https://mrguidolin.github.io/atlas-acupression/";
 // l'iPhone, compare les numéros de version et recharge si besoin. La
 // lecture « reload » remplace aussi la copie en cache : au prochain
 // lancement, l'app s'ouvre directement sur la nouvelle version.
-const APP_VERSION = "35.6";
+const APP_VERSION = "35.7";
 const verCmp = (a, b) => { const x = a.split(".").map(Number), y = b.split(".").map(Number); for (let i = 0; i < Math.max(x.length, y.length); i++){ const d = (x[i] || 0) - (y[i] || 0); if (d) return d; } return 0; };
 async function checkUpdate(btn){
  const st = $(".ver-st"), say = m => { if (st) st.textContent = m; };
