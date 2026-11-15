@@ -4482,14 +4482,15 @@ function brFrame(){
  }
  BR.raf = requestAnimationFrame(brFrame);
 }
-// Gong de méditation : frappé quand la phase commence, sa vibration
-// diminue peu à peu et s'éteint juste quand vient le mouvement suivant.
-// Poumons pleins (début de l'expiration) : La ; poumons vides : Ré, une quinte plus bas.
+// Vrai gong enregistré (VCSL, CC0), frappé doucement quand la phase
+// commence ; sa vibration diminue peu à peu et s'éteint juste quand vient
+// le mouvement suivant. Poumons vides : le gong à sa hauteur (grave) ;
+// poumons pleins : une quarte plus haut. Volume modéré : aucune saturation.
 function brTone(ph, dur){
  if (navigator.vibrate) { try { navigator.vibrate(20); } catch(e) {} }
  if (!BR || !BR.o.sound || !SND.ac) return;
  const ac = SND.ac, t = ac.currentTime + .02, b = SND.files.gong;
- const full = ph === "out", rate = full ? 1 : .6674, peak = full ? .8 : .9, span = dur + .35;
+ const full = ph === "out", rate = full ? 1.335 : 1, peak = full ? .45 : .5, span = dur + .35;
  try {
   const g = ac.createGain();
   const N = 48, curve = new Float32Array(N);
@@ -4502,7 +4503,7 @@ function brTone(ph, dur){
    s.connect(g); s.start(t); s.stop(t + span + .05);
   } else {
    // secours : même gong, synthétisé sur place
-   const f = 220 * rate;
+   const f = 142 * rate;
    [[1, 1, 22, .55], [2.76, .42, 12, 1.15], [5.15, .14, 4.5, 1.8]].forEach(([r, a, t60, bt]) => [[-bt / 2, a], [bt / 2, a * .45]].forEach(([d, amp]) => {
     const o = ac.createOscillator(), og = ac.createGain(); o.frequency.value = f * r + d;
     og.gain.setValueAtTime(0, t); og.gain.linearRampToValueAtTime(amp * .15, t + .004);
@@ -5093,9 +5094,9 @@ function screenProfil(){
   <p><b>Fonctions.</b> Médecine traditionnelle chinoise, d'après Deadman, <em>A Manual of Acupuncture</em>, et Maciocia, <em>Les principes fondamentaux de la médecine chinoise</em>.</p>
   <p><b>Preuves.</b> Les fonctions décrites viennent de la tradition. Elles ne sont pas démontrées par la science, sauf mention contraire, comme pour MC 6 et les nausées après une opération.</p>
   ${PL.man && PL.man.credit ? `<p><b>Illustrations.</b> ${plEsc(PL.man.credit)}</p>` : ""}
-  <p><b>Sons.</b> Enregistrements libres de droits, adaptés pour boucler sans coupure. Pluie : <a href="https://freesound.org/people/alex36917/sounds/524605/" target="_blank" rel="noopener">alex36917</a> ; vagues : <a href="https://freesound.org/people/Luftrum/sounds/48412/" target="_blank" rel="noopener">Luftrum</a> (Freesound, licence CC BY) ; oiseaux : kvgarlic ; ruisseau : gluckose (CC0), via l'application Blanket. Forêt, feu de bois, grillons, carillon, tonnerre, chouette et bol chantant : via l'application Moodist (CC0 ou licence Pixabay). Piano : échantillons d'un vrai piano, <a href="https://versilian-studios.com/vsco-community/" target="_blank" rel="noopener">Versilian Studios, VSCO 2 Community Edition</a> (domaine public, CC0) ; la mélodie a été composée pour l'app. La nappe, le bip et le gong de la respiration sont fabriqués par l'app.</p>
+  <p><b>Sons.</b> Enregistrements libres de droits, adaptés pour boucler sans coupure. Pluie : <a href="https://freesound.org/people/alex36917/sounds/524605/" target="_blank" rel="noopener">alex36917</a> ; vagues : <a href="https://freesound.org/people/Luftrum/sounds/48412/" target="_blank" rel="noopener">Luftrum</a> (Freesound, licence CC BY) ; oiseaux : kvgarlic ; ruisseau : gluckose (CC0), via l'application Blanket. Forêt, feu de bois, grillons, carillon, tonnerre, chouette et bol chantant : via l'application Moodist (CC0 ou licence Pixabay). Piano : échantillons d'un vrai piano, <a href="https://versilian-studios.com/vsco-community/" target="_blank" rel="noopener">Versilian Studios, VSCO 2 Community Edition</a> (domaine public, CC0) ; la mélodie a été composée pour l'app. Gong de la respiration : vrai gong enregistré, <a href="https://github.com/sgossner/VCSL" target="_blank" rel="noopener">Versilian Community Sample Library</a> (domaine public, CC0). La nappe et le bip sont fabriqués par l'app.</p>
  </div></div>
- <p class="fine">Version 35.1.</p>`;
+ <p class="fine">Version 35.2.</p>`;
 }
 
 // ── Premier lancement : choix de la silhouette ───────────────
