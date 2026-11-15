@@ -1375,6 +1375,16 @@ html{touch-action:manipulation}
 .wk-pt h1:focus,.wk-pt h1:focus-visible{outline:none!important;box-shadow:none!important}
 .sess-cta.sess-after{margin-top:14px}
 
+
+/* v35.1 · écrans de réglage (séance guidée, respiration) : barre du haut
+   toujours visible (sous l'heure), bouton du bas collé au bord, rien ne
+   déborde au-dessus ni au-dessous */
+.sheet.modal:has(> .sx-dock){padding-top:0;padding-bottom:0;display:flex;flex-direction:column}
+.sheet.modal:has(> .sx-dock) > .bar{position:sticky;top:0;z-index:6;flex:none;padding-top:calc(6px + env(safe-area-inset-top,0px));background:color-mix(in srgb,var(--bg) 86%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);border-bottom:1px solid var(--hair)}
+.sheet.modal:has(> .sx-dock) > .detail{flex:none;width:100%;padding-bottom:20px}
+.sheet.modal:has(> .sx-dock) > .sx-dock{flex:none;width:100%;margin:auto auto 0;background:linear-gradient(to bottom,transparent,var(--bg) 20px)}
+.grp-row.brs-line .switch{flex:none}
+.sx .amb-grid{margin-top:2px}
 </style>
 </head>
 <body>
@@ -4079,7 +4089,7 @@ function setupHTML(){
    <span class="pt-t"><span class="pt-l"><span class="pt-n">${i + 1}</span><span class="code" style="${elVar(p.m)}">${code(p)}</span><b>${p.py}</b></span><span class="pt-fs">${p.fs}</span><span class="pt-side${ci ? " is-ci" : ""}">${ci ? "À éviter pendant la grossesse" : side}</span></span>
   </li>`;
  }).join("");
- const amb = AMB_GROUPS.map(([g, list]) => `<p class="amb-g">${g}</p><div class="amb-grid">${list.map(([k, t, ic]) => `<button class="amb${o.amb === k ? " on" : ""}" data-s="opt" data-k="amb" data-v="${k}" aria-pressed="${o.amb === k}">${msi(ic, o.amb === k)}<span>${t}</span></button>`).join("")}</div>`).join("");
+ const amb = `<div class="amb-grid">${AMBIENCES.map(([k, t, ic]) => `<button class="amb${o.amb === k ? " on" : ""}" data-s="opt" data-k="amb" data-v="${k}" aria-pressed="${o.amb === k}">${msi(ic, o.amb === k)}<span>${t}</span></button>`).join("")}</div>`;
  return `${modalBar("Séance guidée", `<button class="mbar-l" data-act="back">Annuler</button>`)}
  <article class="detail sx">
   <p class="eyebrow" style="color:var(--c-${cat.k})">${cat.name}</p>
@@ -4096,7 +4106,8 @@ function setupHTML(){
 
   <h3 class="grp-t">Son</h3>
   <div class="grp">
-   <div class="grp-row col"><span class="grp-l">Bip entre les points</span>${segc("signal", SIGNALS, o.signal, "Bip entre les points")}</div>
+   <div class="grp-row brs-line"><span><b>Bip entre les points</b><small>Au début et à la fin de chaque pression</small></span>
+    <button class="switch" role="switch" data-s="opt" data-k="signal" data-v="${o.signal === "none" ? "bip" : "none"}" aria-checked="${o.signal !== "none"}" aria-label="Bip entre les points"></button></div>
    <div class="grp-row col"><span class="grp-l">Ambiance de fond</span>${amb}</div>
    <div class="grp-row vol-row${o.amb === "none" ? " is-off" : ""}">${msi("volume_down")}<input class="vol" type="range" min="0" max="1" step="0.05" value="${o.vol}" data-s="vol" aria-label="Volume de l'ambiance">${msi("volume_up")}</div>
   </div>
@@ -4122,7 +4133,7 @@ function setupAction(t, sheet){
  const y = sheet.scrollTop;
  replaceTop(setupHTML());
  sheet.scrollTop = y;
- const f = sheet.querySelector(`[data-s="${a}"]${t.dataset.i !== undefined ? `[data-i="${i}"]` : ""}${t.dataset.v !== undefined ? `[data-v="${t.dataset.v}"]` : ""}${t.dataset.k ? `[data-k="${t.dataset.k}"]` : ""}`);
+ const f = t.dataset.k === "signal" ? sheet.querySelector('[data-k="signal"]') : sheet.querySelector(`[data-s="${a}"]${t.dataset.i !== undefined ? `[data-i="${i}"]` : ""}${t.dataset.v !== undefined ? `[data-v="${t.dataset.v}"]` : ""}${t.dataset.k ? `[data-k="${t.dataset.k}"]` : ""}`);
  f && !f.disabled && f.focus({preventScroll:true});
 }
 function setupInput(e){
@@ -4320,9 +4331,9 @@ function histHTML(){
 // Respiration guidée (cohérence cardiaque).
 // Deux écrans : les réglages (rythme, durée, son), puis la séance,
 // où une grande sphère monte à l'inspiration et descend à
-// l'expiration. Un son de bol tenu, qui vibre doucement, accompagne
-// toute l'inspiration puis toute l'expiration (plus grave), avec des
-// fondus enchaînés ; à la fin il s'éteint lentement.
+// l'expiration. Un gong retentit poumons pleins (note aiguë) et poumons
+// vides (une quinte plus bas) ; sa vibration s'éteint peu à peu jusqu'au
+// mouvement suivant.
 // ─────────────────────────────────────────────────────────────
 const BR_MODES = [
  ["equilibrer", "Équilibrer", 5, 5],
@@ -4349,7 +4360,7 @@ const brEase = p => .5 - Math.cos(Math.PI * Math.max(0, Math.min(1, p))) / 2;
 const brDur = s => `${Math.floor(s / 60)} min${s % 60 ? " 30" : ""}`;
 
 function openBreath(mode){
- audioInit(); loadSample("souffle").catch(() => {});
+ audioInit(); loadSample("gong").catch(() => {});
  const o = breathOpts(); if (mode) o.mode = mode;
  BR = {o, state:"idle", t0:0, pausedT:0, total:0, phase:null, cycles:0, raf:0, timer:0, el:null};
  BR.el = push(breathHTML(), el => { el.dataset.breath = "1"; el.classList.add("breath"); }, "modal");
@@ -4384,10 +4395,10 @@ function setupBreathHTML(){
 
   <h3 class="grp-t">Séance</h3>
   <div class="grp">
-   <div class="grp-row brs-line"><span><b>Durée</b><small>Par 30 secondes</small></span>
+   <div class="grp-row brs-line"><span><b>Durée</b><small>${Math.round(o.secs / (r.inh + r.exh))} respirations</small></span>
     <span class="brs-step"><button data-b="dur" data-d="-30" aria-label="30 secondes de moins" ${o.secs > BR_SEC_MIN ? "" : "disabled"}>${msi("remove")}</button><b aria-live="polite">${brDur(o.secs)}</b><button data-b="dur" data-d="30" aria-label="30 secondes de plus" ${o.secs < BR_SEC_MAX ? "" : "disabled"}>${msi("add")}</button></span></div>
-   <div class="grp-row brs-line"><span><b>Son guide</b><small>Un coup de bol à chaque changement</small></span>
-    <button class="switch" role="switch" data-b="sound" aria-checked="${o.sound}" aria-label="Son guide"></button></div>
+   <div class="grp-row brs-line"><span><b>Gong</b><small>Poumons pleins et poumons vides</small></span>
+    <button class="switch" role="switch" data-b="sound" aria-checked="${o.sound}" aria-label="Gong"></button></div>
   </div>
  </article>
  <div class="sx-dock"><button class="btn btn-primary btn-go" data-b="start">${msi("play_arrow", true)}Lancer la séance</button></div>`;
@@ -4434,7 +4445,7 @@ function brView(){
 
 // ── Déroulé ──────────────────────────────────────────────────
 function brStart(){
- audioInit(); loadSample("souffle").catch(() => {});
+ audioInit(); loadSample("gong").catch(() => {});
  const r = breathRhythm(BR.o), cyc = (r.inh + r.exh) * 1000;
  BR.r = r; BR.total = Math.ceil(BR.o.secs * 1000 / cyc) * cyc;
  BR.state = "run"; BR.t0 = performance.now() + BR_LEAD; BR.phase = null; BR.cycles = 0;
@@ -4453,7 +4464,7 @@ function brTick(){
   if (v.ph === "in" && !resumed) BR.cycles++;
   const r = BR.r, cyc = (r.inh + r.exh) * 1000, tc = t % cyc;
   const left = (v.ph === "in" ? r.inh * 1000 - tc : cyc - tc) / 1000;
-  if (left > .6) brTone(v.ph, left);
+  if (left > .6 && !resumed) brTone(v.ph, left);
  }
  const rem = BR.el.querySelector(".br-rem"); if (rem && rem.textContent !== v.rem) rem.textContent = v.rem;
 }
@@ -4471,35 +4482,32 @@ function brFrame(){
  }
  BR.raf = requestAnimationFrame(brFrame);
 }
-// Son tenu de bol chantant pendant toute la phase : il monte en douceur,
-// vibre, puis s'éteint lentement en se fondant dans la phase suivante.
-// Expiration une quarte plus bas.
-const BR_FADE_OUT = 1.6;
+// Gong de méditation : frappé quand la phase commence, sa vibration
+// diminue peu à peu et s'éteint juste quand vient le mouvement suivant.
+// Poumons pleins (début de l'expiration) : La ; poumons vides : Ré, une quinte plus bas.
 function brTone(ph, dur){
  if (navigator.vibrate) { try { navigator.vibrate(20); } catch(e) {} }
  if (!BR || !BR.o.sound || !SND.ac) return;
- const ac = SND.ac, t = ac.currentTime + .02, b = SND.files.souffle;
- const rate = ph === "in" ? 1 : .749, peak = ph === "in" ? .7 : .78;
- const up = Math.min(1.4, dur * .35), down = Math.min(BR_FADE_OUT, dur * .45), end = t + dur + .5;
+ const ac = SND.ac, t = ac.currentTime + .02, b = SND.files.gong;
+ const full = ph === "out", rate = full ? 1 : .6674, peak = full ? .8 : .9, span = dur + .35;
  try {
-  const g = ac.createGain(), env = g.gain;
-  env.setValueAtTime(0, t);
-  env.linearRampToValueAtTime(peak * (ph === "in" ? .8 : 1), t + up);
-  env.linearRampToValueAtTime(peak * (ph === "in" ? 1 : .8), t + dur - down);
-  // descente en cosinus : pas de chute brusque, se termine à zéro
-  const N = 32, curve = new Float32Array(N), from = peak * (ph === "in" ? 1 : .8);
-  for (let k = 0; k < N; k++) curve[k] = from * Math.pow(Math.cos(k / (N - 1) * Math.PI / 2), 2);
-  env.setValueCurveAtTime(curve, t + dur - down + .002, down + .5);
+  const g = ac.createGain();
+  const N = 48, curve = new Float32Array(N);
+  for (let k = 0; k < N; k++){ const x = k / (N - 1); curve[k] = peak * Math.pow(Math.cos(x * Math.PI / 2), 1.3); }
+  g.gain.setValueAtTime(peak, t);
+  g.gain.setValueCurveAtTime(curve, t + .001, span);
   g.connect(bus("brBus"));
   if (b && !(b instanceof Promise)){
    const s = ac.createBufferSource(); s.buffer = b; s.playbackRate.value = rate;
-   s.connect(g); s.start(t, 1.5); s.stop(end + .05);
+   s.connect(g); s.start(t); s.stop(t + span + .05);
   } else {
-   // secours : synthèse directe du même bol (doublets qui battent)
-   const f = 196 * rate;
-   [[1, 1, .75], [2.71, .38, 1.35], [5.15, .11, 2.1]].forEach(([r, a, bt]) => [[-bt / 2, a], [bt / 2, a * .4]].forEach(([d, amp]) => {
-    const o = ac.createOscillator(), og = ac.createGain(); o.frequency.value = f * r + d; og.gain.value = amp * .16;
-    o.connect(og); og.connect(g); o.start(t); o.stop(end + .05);
+   // secours : même gong, synthétisé sur place
+   const f = 220 * rate;
+   [[1, 1, 22, .55], [2.76, .42, 12, 1.15], [5.15, .14, 4.5, 1.8]].forEach(([r, a, t60, bt]) => [[-bt / 2, a], [bt / 2, a * .45]].forEach(([d, amp]) => {
+    const o = ac.createOscillator(), og = ac.createGain(); o.frequency.value = f * r + d;
+    og.gain.setValueAtTime(0, t); og.gain.linearRampToValueAtTime(amp * .15, t + .004);
+    og.gain.exponentialRampToValueAtTime(.0001, t + t60 / 3);
+    o.connect(og); og.connect(g); o.start(t); o.stop(t + span + .05);
    }));
   }
  } catch(e) {}
@@ -4534,7 +4542,7 @@ function breathAction(t){
  if (a === "dur"){ keep(() => { o.secs = Math.max(BR_SEC_MIN, Math.min(BR_SEC_MAX, o.secs + +t.dataset.d)); }); return refocus(`[data-b="dur"][data-d="${t.dataset.d}"]`); }
  if (a === "sound"){
   keep(() => { o.sound = !o.sound; }); refocus('[data-b="sound"]');
-  if (o.sound){ audioInit(); const demo = () => { brTone("in", 3.5); }; loadSample("souffle").then(demo).catch(demo); }
+  if (o.sound){ audioInit(); const demo = () => { brTone("out", 5); }; loadSample("gong").then(demo).catch(demo); }
   else brHush();
   return;
  }
@@ -5085,9 +5093,9 @@ function screenProfil(){
   <p><b>Fonctions.</b> Médecine traditionnelle chinoise, d'après Deadman, <em>A Manual of Acupuncture</em>, et Maciocia, <em>Les principes fondamentaux de la médecine chinoise</em>.</p>
   <p><b>Preuves.</b> Les fonctions décrites viennent de la tradition. Elles ne sont pas démontrées par la science, sauf mention contraire, comme pour MC 6 et les nausées après une opération.</p>
   ${PL.man && PL.man.credit ? `<p><b>Illustrations.</b> ${plEsc(PL.man.credit)}</p>` : ""}
-  <p><b>Sons.</b> Enregistrements libres de droits, adaptés pour boucler sans coupure. Pluie : <a href="https://freesound.org/people/alex36917/sounds/524605/" target="_blank" rel="noopener">alex36917</a> ; vagues : <a href="https://freesound.org/people/Luftrum/sounds/48412/" target="_blank" rel="noopener">Luftrum</a> (Freesound, licence CC BY) ; oiseaux : kvgarlic ; ruisseau : gluckose (CC0), via l'application Blanket. Forêt, feu de bois, grillons, carillon, tonnerre, chouette et bol chantant : via l'application Moodist (CC0 ou licence Pixabay). Piano : échantillons d'un vrai piano, <a href="https://versilian-studios.com/vsco-community/" target="_blank" rel="noopener">Versilian Studios, VSCO 2 Community Edition</a> (domaine public, CC0) ; la mélodie a été composée pour l'app. La nappe, le bip et le bol de la respiration sont fabriqués par l'app.</p>
+  <p><b>Sons.</b> Enregistrements libres de droits, adaptés pour boucler sans coupure. Pluie : <a href="https://freesound.org/people/alex36917/sounds/524605/" target="_blank" rel="noopener">alex36917</a> ; vagues : <a href="https://freesound.org/people/Luftrum/sounds/48412/" target="_blank" rel="noopener">Luftrum</a> (Freesound, licence CC BY) ; oiseaux : kvgarlic ; ruisseau : gluckose (CC0), via l'application Blanket. Forêt, feu de bois, grillons, carillon, tonnerre, chouette et bol chantant : via l'application Moodist (CC0 ou licence Pixabay). Piano : échantillons d'un vrai piano, <a href="https://versilian-studios.com/vsco-community/" target="_blank" rel="noopener">Versilian Studios, VSCO 2 Community Edition</a> (domaine public, CC0) ; la mélodie a été composée pour l'app. La nappe, le bip et le gong de la respiration sont fabriqués par l'app.</p>
  </div></div>
- <p class="fine">Version 35.0.</p>`;
+ <p class="fine">Version 35.1.</p>`;
 }
 
 // ── Premier lancement : choix de la silhouette ───────────────
