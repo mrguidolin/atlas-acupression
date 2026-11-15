@@ -5111,12 +5111,12 @@ function screenPratiquer(){
 }
 
 // ── Onglet Repères ───────────────────────────────────────────
-// Mesure en cun : la vraie main des planches 3D, doigts serrés (doigts découpés
-// sur la planche et refermés), avec la règle sur le pli de l'articulation du
+// Mesure en cun : la vraie main des planches 3D, doigts serrés (chaque doigt est
+// redressé le long de sa ligne médiane, largeur conservée), avec la règle sur le pli de l'articulation du
 // milieu du majeur, ou en travers du pouce. Suit la silhouette choisie.
 function cunFig(n){
  const sx = S.sex === "f" ? "f" : "m";
- return `<img class="cun-img" src="plates/cun-${sx}-${n}.webp?v=36" alt="" loading="lazy" decoding="async">`;
+ return `<img class="cun-img" src="plates/cun-${sx}-${n}.webp?v=36b" alt="" loading="lazy" decoding="async">`;
 }
 const LEXIQUE = [
  ["Qi","L'énergie vitale qui, selon la tradition, anime le corps et circule dans les méridiens."],
@@ -5173,7 +5173,7 @@ const APP_URL = "https://mrguidolin.github.io/atlas-acupression/";
 // l'iPhone, compare les numéros de version et recharge si besoin. La
 // lecture « reload » remplace aussi la copie en cache : au prochain
 // lancement, l'app s'ouvre directement sur la nouvelle version.
-const APP_VERSION = "36.1";
+const APP_VERSION = "36.2";
 const verCmp = (a, b) => { const x = a.split(".").map(Number), y = b.split(".").map(Number); for (let i = 0; i < Math.max(x.length, y.length); i++){ const d = (x[i] || 0) - (y[i] || 0); if (d) return d; } return 0; };
 async function checkUpdate(btn){
  const st = $(".ver-st"), say = m => { if (st) st.textContent = m; };
