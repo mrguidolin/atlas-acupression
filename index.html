@@ -1456,6 +1456,10 @@ html{touch-action:manipulation}
 
 /* v36.1 · mesures en cun : images tirées des planches 3D */
 .cun .cun-img{width:100%;max-width:170px;height:auto;aspect-ratio:1/1;object-fit:contain}
+
+/* v36.6 · figure 5 cun en pleine largeur */
+.cun .cun-wide{grid-column:1/-1}
+.cun .cun-wide svg{max-width:300px}
 </style>
 </head>
 <body>
@@ -5115,7 +5119,12 @@ function screenPratiquer(){
 // quatre figures, aux couleurs des figures de l'app (clair et sombre). Le pouce ou
 // les doigts qui servent à la mesure sont teintés en bleu ; la règle est posée sur
 // le pli de l'articulation du pouce, ou sur celui du milieu du majeur.
-function cunFig(n){
+function cunFig(n, tag = ""){
+ if (n === 5){
+  // 5 cun : 4 doigts (3 cun) puis 3 doigts (2 cun)
+  const a = cunFig(4, "a").replace("<svg ", `<svg x="0" y="0" width="112" height="150" `), b = cunFig(3, "b").replace("<svg ", `<svg x="128" y="0" width="112" height="150" `);
+  return `<svg viewBox="0 0 240 150" aria-hidden="true">${a}<text x="120" y="66" text-anchor="middle" style="font:700 18px var(--f-body);fill:var(--brand)">+</text>${b}</svg>`;
+ }
  // doigts : [gauche, droite, haut] ; index, majeur, annulaire, auriculaire
  const FG = [[46, 61.5, 27], [61.5, 77.5, 18], [77.5, 92.5, 24], [92.5, 105, 41]], WEB = 79;
  const r = f => (f[1] - f[0]) / 2;
@@ -5143,7 +5152,7 @@ function cunFig(n){
  crease += `M${IP[0] - TN[0] * 5.4} ${IP[1] - TN[1] * 5.4} Q${IP[0] + TA[0] * 1.6} ${IP[1] + TA[1] * 1.6} ${IP[0] + TN[0] * 5.4} ${IP[1] + TN[1] * 5.4}`;
  // teinte bleue sur ce qui sert à la mesure (découpée par la silhouette)
  let tint = "";
- const uid = "cun" + n;
+ const uid = "cun" + n + tag;
  if (n === 1){
   tint = `<path d="M31 121 L46.5 98.5 L46.5 60 L0 60 L0 121 Z"/>`;   // partie libre du pouce
  } else {
@@ -5203,6 +5212,7 @@ function screenReperes(){
   <figure>${cunFig(2)}<b>1,5 cun</b><figcaption>2 doigts joints</figcaption></figure>
   <figure>${cunFig(3)}<b>2 cun</b><figcaption>3 doigts joints</figcaption></figure>
   <figure>${cunFig(4)}<b>3 cun</b><figcaption>4 doigts joints</figcaption></figure>
+  <figure class="cun-wide">${cunFig(5)}<b>5 cun</b><figcaption>4 doigts joints, puis 3 doigts joints</figcaption></figure>
  </div>
  <p class="small">Doigts serrés, mesurez à la hauteur de l'articulation du milieu des doigts (pour le pouce, à la hauteur de son articulation). Quand une distance compte, l'illustration la montre avec une petite règle, en cun et, quand c'est possible, en doigts.</p>
  <h2>Lexique</h2>
@@ -5225,7 +5235,7 @@ const APP_URL = "https://mrguidolin.github.io/atlas-acupression/";
 // l'iPhone, compare les numéros de version et recharge si besoin. La
 // lecture « reload » remplace aussi la copie en cache : au prochain
 // lancement, l'app s'ouvre directement sur la nouvelle version.
-const APP_VERSION = "36.5";
+const APP_VERSION = "36.6";
 const verCmp = (a, b) => { const x = a.split(".").map(Number), y = b.split(".").map(Number); for (let i = 0; i < Math.max(x.length, y.length); i++){ const d = (x[i] || 0) - (y[i] || 0); if (d) return d; } return 0; };
 async function checkUpdate(btn){
  const st = $(".ver-st"), say = m => { if (st) st.textContent = m; };
