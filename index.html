@@ -1403,6 +1403,28 @@ html{touch-action:manipulation}
 .sea-h small{font-size:.875rem;font-weight:600;color:var(--muted)}
 .sea-now{margin-left:auto;font-style:normal;font-size:.8125rem;font-weight:700;color:#fff;background:var(--c-saisons);padding:.3em .7em;border-radius:999px;white-space:nowrap}
 .sea-t{color:var(--muted);font-size:.9375rem;line-height:1.5;margin:0 0 10px}
+
+/* v35.6 · réglages de la séance guidée, plus simples */
+.sx2 .h1d{margin-bottom:14px}
+.sx-hero{background:var(--card);border-radius:16px;padding:16px 18px}
+.sx-time{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.sx-time b{font-size:2.25rem;font-weight:800;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+.sx-time span{color:var(--muted);font-size:.9375rem;font-weight:500}
+.sx-ids{margin-top:8px;color:var(--brand-ink);font-size:.9375rem;font-weight:600}
+.sx2 .grp-t{margin-top:24px}
+.amb-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:2px -16px 0;padding:2px 16px 4px;scroll-padding:16px}
+.amb-row::-webkit-scrollbar{display:none}
+.amb-chip{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px 0 11px;border-radius:999px;background:var(--seg-track);color:var(--ink);font-weight:600;font-size:.9375rem;white-space:nowrap}
+.amb-chip .msi{font-size:20px}
+.amb-chip.on{background:var(--brand);color:#fff}
+.sx-amb .vol-row{margin-top:6px}
+.sx-adv-t{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;margin-top:24px;padding:14px 16px;background:var(--card);border-radius:14px;text-align:left}
+.sx-adv-t[aria-expanded="true"]{border-radius:14px 14px 0 0}
+.sx-adv-t b{display:block;font-weight:600}
+.sx-adv-t small{display:block;color:var(--muted);font-size:.9375rem;margin-top:1px}
+.sx-adv-t .msi{color:var(--muted)}
+.sx-adv{border-radius:0 0 14px 14px;border-top:1px solid var(--hair)}
+.sx-note{color:var(--muted);font-size:.875rem;line-height:1.4}
 </style>
 </head>
 <body>
@@ -4131,32 +4153,40 @@ function setupHTML(){
    <span class="pt-t"><span class="pt-l"><span class="pt-n">${i + 1}</span><span class="code" style="${elVar(p.m)}">${code(p)}</span><b>${p.py}</b></span><span class="pt-fs">${p.fs}</span><span class="pt-side${ci ? " is-ci" : ""}">${ci ? "À éviter pendant la grossesse" : side}</span></span>
   </li>`;
  }).join("");
- const amb = `<div class="amb-grid">${AMBIENCES.map(([k, t, ic]) => `<button class="amb${o.amb === k ? " on" : ""}" data-s="opt" data-k="amb" data-v="${k}" aria-pressed="${o.amb === k}">${msi(ic, o.amb === k)}<span>${t}</span></button>`).join("")}</div>`;
+ const ambs = [AMBIENCES.find(a => a[0] === "none"), ...AMBIENCES.filter(a => a[0] !== "none")];
+ const amb = `<div class="amb-row" role="radiogroup" aria-label="Ambiance de fond">${ambs.map(([k, t, ic]) => `<button class="amb-chip${o.amb === k ? " on" : ""}" role="radio" data-s="opt" data-k="amb" data-v="${k}" aria-checked="${o.amb === k}">${msi(ic, o.amb === k)}<span>${t}</span></button>`).join("")}</div>`;
+ const ids = SU.list.filter(r => r.on).map(r => code(BY[r.id]));
+ const advSum = `${fmtDur(o.pause)} pour trouver · ${o.sides === "seq" ? "gauche puis droite" : "deux côtés ensemble"}`;
  return `${modalBar("Séance guidée", `<button class="mbar-l" data-act="back">Annuler</button>`)}
- <article class="detail sx">
+ <article class="detail sx sx2">
   <p class="eyebrow" style="color:var(--c-${cat.k})">${cat.name}</p>
   <h1 class="h1d">${it.name}</h1>
-  <div class="sx-sum"><span><b>${n}</b> point${n > 1 ? "s" : ""}</span><span><b>${steps.length}</b> étape${steps.length > 1 ? "s" : ""}</span><span><b>${fmtTotal(total)}</b> en tout</span></div>
 
-  <h3 class="grp-t">Minuteur</h3>
-  <div class="grp">
-   <div class="grp-row col"><span class="grp-l">Durée par point</span>${segc("dur", SESS_DUR.map(d => [d, fmtDur(d)]), o.dur, "Durée par point")}</div>
-   <div class="grp-row col"><span class="grp-l">Temps pour trouver le point</span>${segc("pause", SESS_PAUSE.map(d => [d, fmtDur(d)]), o.pause, "Temps pour trouver le point")}</div>
-   <div class="grp-row col"><span class="grp-l">Points des deux côtés</span>${segc("sides", [["seq","L'un après l'autre"],["both","En même temps"]], o.sides, "Points des deux côtés")}</div>
+  <div class="sx-hero">
+   <div class="sx-time"><b>${fmtTotal(total)}</b><span>${n} point${n > 1 ? "s" : ""} · ${steps.length} étape${steps.length > 1 ? "s" : ""}</span></div>
+   <p class="sx-ids">${ids.join(" · ")}</p>
   </div>
-  <p class="grp-foot">${o.sides === "seq" ? "Le minuteur compte chaque côté séparément." : "Les deux côtés en même temps, avec les deux mains."}</p>
+
+  <h3 class="grp-t">Durée par point</h3>
+  ${segc("dur", SESS_DUR.map(d => [d, fmtDur(d)]), o.dur, "Durée par point")}
 
   <h3 class="grp-t">Son</h3>
   <div class="grp">
    <div class="grp-row brs-line"><span><b>Bip entre les points</b><small>Au début et à la fin de chaque pression</small></span>
     <button class="switch" role="switch" data-s="opt" data-k="signal" data-v="${o.signal === "none" ? "bip" : "none"}" aria-checked="${o.signal !== "none"}" aria-label="Bip entre les points"></button></div>
-   <div class="grp-row col"><span class="grp-l">Ambiance de fond</span>${amb}</div>
-   <div class="grp-row vol-row${o.amb === "none" ? " is-off" : ""}">${msi("volume_down")}<input class="vol" type="range" min="0" max="1" step="0.05" value="${o.vol}" data-s="vol" aria-label="Volume de l'ambiance">${msi("volume_up")}</div>
+   <div class="grp-row col sx-amb"><span class="brs-line"><span><b>Ambiance</b><small>Touchez pour écouter</small></span></span>${amb}
+    ${o.amb === "none" ? "" : `<div class="vol-row">${msi("volume_down")}<input class="vol" type="range" min="0" max="1" step="0.05" value="${o.vol}" data-s="vol" aria-label="Volume de l'ambiance">${msi("volume_up")}</div>`}</div>
   </div>
-  <p class="grp-foot">Touchez une ambiance pour l'écouter quelques secondes. Écouteurs conseillés pour la nature. Sur iPhone, désactivez le mode silencieux.</p>
 
+  <button class="sx-adv-t" data-s="adv" aria-expanded="${!!SU.adv}"><span><b>Plus de réglages</b><small>${advSum}</small></span>${msi(SU.adv ? "expand_less" : "expand_more")}</button>
+  ${SU.adv ? `<div class="grp sx-adv">
+   <div class="grp-row col"><span class="grp-l">Temps pour trouver le point</span>${segc("pause", SESS_PAUSE.map(d => [d, fmtDur(d)]), o.pause, "Temps pour trouver le point")}</div>
+   <div class="grp-row col"><span class="grp-l">Points des deux côtés</span>${segc("sides", [["seq","L'un après l'autre"],["both","En même temps"]], o.sides, "Points des deux côtés")}
+    <small class="sx-note">${o.sides === "seq" ? "Le minuteur compte chaque côté séparément." : "Les deux côtés en même temps, avec les deux mains."}</small></div>
+  </div>` : ""}
+  <p class="grp-foot">Sur iPhone, désactivez le mode silencieux pour entendre le son.</p>
  </article>
- <div class="sx-dock"><button class="btn btn-primary btn-go" data-s="start" ${n ? "" : "disabled"}>${msi("play_arrow", true)}Commencer · ${fmtTotal(total)}</button></div>`;
+ <div class="sx-dock"><button class="btn btn-primary btn-go" data-s="start" ${n ? "" : "disabled"}>${msi("play_arrow", true)}Commencer</button></div>`;
 }
 function setupAction(t, sheet){
  const a = t.dataset.s, i = +t.dataset.i, o = SU.opts;
@@ -4172,9 +4202,11 @@ function setupAction(t, sheet){
  else if (a === "tog") SU.list[i].on = !SU.list[i].on;
  else if (a === "rate") SU.before = SU.before === +t.dataset.v ? null : +t.dataset.v;
  else if (a === "start") return startSession();
- const y = sheet.scrollTop;
+ else if (a === "adv") SU.adv = !SU.adv;
+ const y = sheet.scrollTop, row = sheet.querySelector(".amb-row"), ax = row ? row.scrollLeft : 0;
  replaceTop(setupHTML());
  sheet.scrollTop = y;
+ const row2 = sheet.querySelector(".amb-row"); if (row2) row2.scrollLeft = ax;
  const f = t.dataset.k === "signal" ? sheet.querySelector('[data-k="signal"]') : sheet.querySelector(`[data-s="${a}"]${t.dataset.i !== undefined ? `[data-i="${i}"]` : ""}${t.dataset.v !== undefined ? `[data-v="${t.dataset.v}"]` : ""}${t.dataset.k ? `[data-k="${t.dataset.k}"]` : ""}`);
  f && !f.disabled && f.focus({preventScroll:true});
 }
@@ -5111,7 +5143,7 @@ const APP_URL = "https://mrguidolin.github.io/atlas-acupression/";
 // l'iPhone, compare les numéros de version et recharge si besoin. La
 // lecture « reload » remplace aussi la copie en cache : au prochain
 // lancement, l'app s'ouvre directement sur la nouvelle version.
-const APP_VERSION = "35.5";
+const APP_VERSION = "35.6";
 const verCmp = (a, b) => { const x = a.split(".").map(Number), y = b.split(".").map(Number); for (let i = 0; i < Math.max(x.length, y.length); i++){ const d = (x[i] || 0) - (y[i] || 0); if (d) return d; } return 0; };
 async function checkUpdate(btn){
  const st = $(".ver-st"), say = m => { if (st) st.textContent = m; };
