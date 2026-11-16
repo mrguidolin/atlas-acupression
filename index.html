@@ -1509,6 +1509,12 @@ html{touch-action:manipulation}
 .wk-lr{font-size:.75rem;font-weight:700;letter-spacing:.02em;color:var(--brand-ink);background:color-mix(in srgb,var(--brand) 12%,transparent);padding:4px 10px;border-radius:999px}
 .wk-first{display:none!important}
 .wk-pt{margin:4px 0 14px}
+
+/* v37.1 — pied du parcours à hauteur fixe (gauche et droite identiques) */
+.wk-next{height:60px;min-height:60px}
+.wk-prev{height:60px;min-height:60px}
+.wk-next-t small,.wk-next-t b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.detail > .care{margin-top:24px}
 </style>
 </head>
 <body>
@@ -3505,11 +3511,15 @@ function plPointFig(p, M, o){
  if (cun) focus.push(cun.a, cun.b);
  lms.forEach(l => focus.push(l.xy));
  let asp = o.aspect || 1;
- if (asp === "auto"){ const [[a0, b0], [a1, b1]] = plUnitBox(V, focus); asp = plClamp((a1 - a0) / (b1 - b0), .75, 1.33); }
+ // v37.1 : côté miroir (planche retournée) : cadrage calculé sur la planche d'origine, puis retourné,
+ // pour que la gauche et la droite aient exactement la même taille d'image
+ const uf = q => flip && q ? [W - q[0], q[1]] : q, focusU = focus.map(uf);
+ if (asp === "auto"){ const [[a0, b0], [a1, b1]] = plUnitBox(V, focusU); asp = plClamp((a1 - a0) / (b1 - b0), .75, 1.33); }
  // v34c-5 (relecture 5, mineur 12) : paire de points très proches (Ding Chuan, 1 cun entre les deux) : cadrage plus serré pour
  // que les deux points, le repère entre eux et la règle restent lisibles
  const tight = rich && P1 && act === "both" && Math.hypot(P1[0] - P0[0], P1[1] - P0[1]) < 1.5 * V.cun;
- const cr = plCrop(V, focus, {aspect: asp, pad: ctx === "card" ? 1.4 : 1.8, minCun: tight ? 4.5 : (ctx === "card" ? 5.5 : 6.5), minFrac: tight ? .3 : (ctx === "card" ? .42 : .48), unit: tight ? false : undefined, keep: act === "mir" ? P1 : P0});
+ const cr0 = plCrop(V, focusU, {aspect: asp, pad: ctx === "card" ? 1.4 : 1.8, minCun: tight ? 4.5 : (ctx === "card" ? 5.5 : 6.5), minFrac: tight ? .3 : (ctx === "card" ? .42 : .48), unit: tight ? false : undefined, keep: uf(act === "mir" ? P1 : P0)});
+ const cr = flip ? [W - cr0[0] - cr0[2], cr0[1], cr0[2], cr0[3]] : cr0;
  const u = cr[2] / (o.w || 340);
  const P = plPlacer(cr, u, plAvoid(V, flip), ctx === "card" ? [44, 58] : [62, 80]);
  let g = "", lab = "";
@@ -5284,7 +5294,7 @@ const APP_URL = "https://mrguidolin.github.io/atlas-acupression/";
 // l'iPhone, compare les numéros de version et recharge si besoin. La
 // lecture « reload » remplace aussi la copie en cache : au prochain
 // lancement, l'app s'ouvre directement sur la nouvelle version.
-const APP_VERSION = "37.0";
+const APP_VERSION = "37.1";
 const verCmp = (a, b) => { const x = a.split(".").map(Number), y = b.split(".").map(Number); for (let i = 0; i < Math.max(x.length, y.length); i++){ const d = (x[i] || 0) - (y[i] || 0); if (d) return d; } return 0; };
 async function checkUpdate(btn){
  const st = $(".ver-st"), say = m => { if (st) st.textContent = m; };
@@ -5499,6 +5509,7 @@ function mkW(ref, name, ids, steps, i){
 const sideWord = lr => lr === "L" ? "côté gauche" : lr === "R" ? "côté droit" : "";
 function walkSideBox(p, W){
  if (!W.lr) return sideBox(p);
+ return "";
  const nx = W.steps[W.i + 1];
  const then = W.lr === "L" ? "Ensuite : le même point, côté droit." : nx ? `Ensuite : ${code(BY[nx.id])}${nx.lr ? ", côté gauche" : ""}.` : "C'est le dernier point.";
  return `<div class="sidebox"><span class="msi" aria-hidden="true">touch_app</span><p><b>${W.lr === "L" ? "Côté gauche." : "Côté droit."}</b> Pressez ce point sur votre ${W.lr === "L" ? "gauche" : "droite"}. ${then}</p></div>`;
@@ -5523,7 +5534,7 @@ function walkEnd(W){
 function walkFoot(W){
  const N = W.steps.length, pv = W.i > 0 && W.steps[W.i - 1], nx = W.i < N - 1 && W.steps[W.i + 1];
  const nq = nx && BY[nx.id], pq = pv && BY[pv.id];
- const nxSmall = nx ? (nx.id === W.id ? "Suivant · même point" : `Suivant · point ${W.ids.indexOf(nx.id) + 1}/${W.ids.length}${nx.lr ? " · gauche" : ""}`) : "";
+ const nxSmall = nx ? (nx.id === W.id ? "Même point" : `Point ${W.ids.indexOf(nx.id) + 1}/${W.ids.length}${nx.lr ? " · gauche" : ""}`) : "";
  return `<nav class="wk-foot" aria-label="Parcours du protocole">
   <button class="wk-prev" data-wgo="${W.i - 1}" ${pv ? `aria-label="Étape précédente : ${wkName(pq)}${pv.lr ? ", " + sideWord(pv.lr) : ""}"` : "disabled aria-label=\"Pas d'étape précédente\""}><span class="msi" aria-hidden="true">arrow_back</span>Précédent</button>
   ${nx ? `<button class="wk-next" data-wgo="${W.i + 1}" aria-label="Suivant : ${code(nq)}, ${nq.py}${nx.lr ? ", " + sideWord(nx.lr) : ""}${ciMark(nq) ? ", à éviter pendant la grossesse" : ""}"><span class="wk-next-t"><small>${nxSmall}</small><b><span class="wk-code">${code(nq)}</span>${nx.id === W.id ? "Côté droit" : nq.py}</b></span><span class="msi" aria-hidden="true">arrow_forward</span></button>`
@@ -5736,10 +5747,9 @@ function openSymptom(ref){
   <p class="sub">${it.intro}</p>
   ${it.how ? `<p class="how"><span class="msi" aria-hidden="true">lightbulb</span><span><b>Bon à savoir.</b> ${it.how}</span></p>` : ""}
   ${pregNote}${pregHint}
-  ${care}
   ${it.breath ? `<button class="sess-cta brc-cta" data-breath="${it.breath}"><span class="sess-cta-ic"><span class="msi" aria-hidden="true">air</span></span><span><b>Respiration guidée</b><small>Pour apaiser · inspirez 4 secondes, soufflez 8 secondes</small></span>${CHEV}</button>` : ""}
   ${body}
-  ${it.evtext && pts.length ? `<section class="sec"><h2>Ce que dit la science</h2><p class="sci">${it.evtext}</p></section>` : ""}
+  ${care}
   ${seeDr}
  </article>`);
 }
