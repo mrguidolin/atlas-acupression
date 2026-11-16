@@ -1476,6 +1476,24 @@ html{touch-action:manipulation}
 .ver2{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .ver-n{font-size:1.0625rem;font-weight:700;line-height:1.3;color:var(--ink);font-variant-numeric:tabular-nums}
 .grp .ver-st{margin:0;padding-top:0;margin-top:-8px;border-top:0!important}
+
+/* v36.9 · en-tête du parcours : progression lisible, compteur + étiquette de côté */
+.wk-ctx{display:grid;gap:8px;padding:2px 16px 12px}
+.wk-segs{order:0;display:flex;gap:5px;margin:0}
+.wk-seg{height:14px}
+.wk-seg i{height:6px;border-radius:3px;background:var(--hair2)}
+.wk-seg.done i{background:color-mix(in srgb,var(--brand) 55%,var(--card))}
+.wk-seg.cur i{background:var(--brand);height:8px;box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 18%,transparent)}
+.wk-segs .wk-seg.wk-r{margin-left:-3px}
+.wk-row{order:1;display:flex;align-items:center;gap:8px;min-height:30px}
+.wk-count{font-size:1rem;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.wk-lr{font-size:.8125rem;font-weight:700;color:var(--brand-ink);background:color-mix(in srgb,var(--brand) 12%,transparent);padding:3px 9px;border-radius:999px}
+.wk-sp{flex:1}
+.wk-pt{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin:6px 0 14px}
+.wk-pt h1{font-size:1.75rem;font-weight:800;letter-spacing:-.01em;line-height:1.1}
+.wk-pt .han{font-size:1.125rem;color:var(--muted)}
+.detail > .wk-pt + .ptr{margin-top:-8px;margin-bottom:12px}
+.sheet.walk .detail.wk-detail{padding-top:6px}
 </style>
 </head>
 <body>
@@ -4881,7 +4899,7 @@ function row(p){
   <span class="code" style="${elVar(p.m)}">${code(p)}</span>
   <span style="min-width:0"><span class="t1"><span class="py">${p.py}</span><span class="hz han">${p.hz}</span></span>
   <span class="t2">${p.tr}</span></span>
-  <span class="end">${preg ? '<span class="badge-preg">Grossesse</span>' : ''}${S.favs.includes(p.id) ? '<span class="star" aria-label="Gardé">★</span>' : ''}${CHEV}</span>
+  <span class="end">${preg ? '<span class="badge-preg">Grossesse</span>' : ''}${CHEV}</span>
  </button></li>`;
 }
 function grouped(pts){
@@ -5251,7 +5269,7 @@ const APP_URL = "https://mrguidolin.github.io/atlas-acupression/";
 // l'iPhone, compare les numéros de version et recharge si besoin. La
 // lecture « reload » remplace aussi la copie en cache : au prochain
 // lancement, l'app s'ouvre directement sur la nouvelle version.
-const APP_VERSION = "36.8";
+const APP_VERSION = "36.9";
 const verCmp = (a, b) => { const x = a.split(".").map(Number), y = b.split(".").map(Number); for (let i = 0; i < Math.max(x.length, y.length); i++){ const d = (x[i] || 0) - (y[i] || 0); if (d) return d; } return 0; };
 async function checkUpdate(btn){
  const st = $(".ver-st"), say = m => { if (st) st.textContent = m; };
@@ -5415,19 +5433,17 @@ function sideBox(p){
 const sidesTxt = p => p.id === "SISHENCONG" ? "Quatre points autour de VG 20" : bilateral(p) ? "Des deux côtés du corps" : p.m === "GV" || p.m === "CV" ? "Un seul point, sur la ligne du milieu" : "Un seul endroit";
 function pointHTML(p, W){
  const m = MER[p.m];
- const fav = S.favs.includes(p.id);
  const fw = Math.min(640, innerWidth) - 32;
  const LR = W && W.lr ? W.lr : null;
  const F = pointFig(p, {ctx:"sheet", w:fw, aspect:"auto", tapLoc:true, lr:LR});
  const sib = POINTS.filter(q => q.m === p.m), i = sib.indexOf(p), prev = sib[i-1], next = sib[i+1];
  const pregBanner = p.preg && S.preg ? `<div class="alert" role="alert">${svgi("warn",18,2)}<span>${p.preg === "ci" ? "À éviter pendant votre grossesse." : "Grossesse : ne pressez pas fort sur cette zone."}</span></div>` : "";
  const precautions = [p.warn, (p.preg === "ci" && !p.warn) ? "À éviter pendant la grossesse." : null].filter(Boolean);
- const head = bar(code(p) + " · " + p.py, `<button class="iconbtn" data-act="fav" data-id="${p.id}" aria-pressed="${fav}" aria-label="${fav ? "Retirer de mes points" : "Garder dans mes points"}">${svgi("star",22,1.8,fav ? "currentColor" : "none")}</button>`);
- const wHead = W ? bar(W.name, `<button class="iconbtn" data-act="fav" data-id="${p.id}" aria-pressed="${fav}" aria-label="${fav ? "Retirer de mes points" : "Garder dans mes points"}">${svgi("star",22,1.8,fav ? "currentColor" : "none")}</button>`) : "";
+ const head = bar(code(p) + " · " + p.py);
+ const wHead = W ? bar(W.name) : "";
  return `${W ? `<div class="wk-head">${wHead}${walkCtx(W)}</div>` : head}
  <article class="detail${W ? " wk-detail" : ""}">
-  ${W ? `<div class="wk-pt"><span class="code" style="${elVar(p.m)}">${code(p)}</span><h1>${p.py}</h1>${LR ? `<span class="wk-side">${LR === "L" ? "Côté gauche" : "Côté droit"}</span>` : ""}<span class="han" lang="zh">${p.hz}</span><button class="mlink" data-mer="${p.m}" aria-label="Méridien : ${m.name}">${m.name} ${svgi("chev",12,2.2)}</button></div>` : `<div class="ptop"><span class="code" style="${elVar(p.m)}">${code(p)}</span><button class="mlink" data-mer="${p.m}">${m.name} ${svgi("chev",14,2.2)}</button></div>
-  <div class="ptitle"><h1>${p.py}</h1><span class="han" lang="zh">${p.hz}</span></div>
+  ${W ? `<div class="wk-pt"><span class="code" style="${elVar(p.m)}">${code(p)}</span><h1>${p.py}</h1><span class="han" lang="zh">${p.hz}</span></div>` : `<div class="wk-pt"><span class="code" style="${elVar(p.m)}">${code(p)}</span><h1>${p.py}</h1><span class="han" lang="zh">${p.hz}</span></div>
   <p class="ptr">${p.tr}</p>`}
   ${pregBanner}
   <figure class="card figcard pfig">${F.html}<figcaption class="pl-cap"><b>Schéma : ${lcFirst(F.cap)}</b>${merCap(F.mer)}</figcaption>${(() => { const e_ = typeof plEntry === "function" ? plEntry(p) : null; return e_ && e_.note ? `<p class="pl-note">${e_.note}</p>` : ""; })()}</figure>
@@ -5477,7 +5493,7 @@ const wkName = p => `${code(p)} ${p.py}`;
 function walkCtx(W){
  const N = W.ids.length;
  return `<div class="wk-ctx">
-  <div class="wk-row"><span class="wk-count">Point ${W.pi + 1} sur ${N}${W.lr ? ` · ${sideWord(W.lr)}` : ""}</span>${W.i > 0 ? `<button class="wk-first" data-wgo="0" aria-label="Revenir au premier point : ${wkName(BY[W.ids[0]])}"><span class="msi" aria-hidden="true">first_page</span>Début</button>` : ""}</div>
+  <div class="wk-row"><span class="wk-count">Point ${W.pi + 1}/${N}</span>${W.lr ? `<span class="wk-lr">${W.lr === "L" ? "Gauche" : "Droite"}</span>` : ""}<span class="wk-sp"></span>${W.i > 0 ? `<button class="wk-first" data-wgo="0" aria-label="Revenir au premier point : ${wkName(BY[W.ids[0]])}"><span class="msi" aria-hidden="true">first_page</span>Début</button>` : ""}</div>
   <div class="wk-segs" role="group" aria-label="Étapes du protocole">${W.steps.map((s, j) => { const q = BY[s.id];
    return `<button class="wk-seg${s.lr === "R" ? " wk-r" : ""}${j < W.i ? " done" : j === W.i ? " cur" : ""}${ciMark(q) ? " is-ci" : ""}" data-wgo="${j}" aria-label="${wkName(q)}${s.lr ? ", " + sideWord(s.lr) : ""}${ciMark(q) ? ", à éviter pendant la grossesse" : ""}"${j === W.i ? ' aria-current="step"' : ""}><i></i></button>`; }).join("")}</div>
 
@@ -5732,7 +5748,6 @@ function sheetClick(e){
   if (sheet.dataset.sess === "play") return SS && playAction(t);
   if (t.dataset.s === "setup") return openSetup(t.dataset.ref);
  }
- if (t.dataset.act === "fav") return toggleFav(t);
  if (t.dataset.wgo !== undefined && sheet.dataset.walk) return walkGo(sheet, +t.dataset.wgo);
  if (t.dataset.walk) return openWalk(t.dataset.walk, t.dataset.id);
  if (t.dataset.go) return openPoint(t.dataset.go, true);
