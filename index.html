@@ -1494,6 +1494,21 @@ html{touch-action:manipulation}
 .wk-pt .han{font-size:1.125rem;color:var(--muted)}
 .detail > .wk-pt + .ptr{margin-top:-8px;margin-bottom:12px}
 .sheet.walk .detail.wk-detail{padding-top:6px}
+
+/* v37.0 — en-tête du parcours : un trait par point */
+.wk-ctx{display:grid;gap:10px;padding:4px 16px 12px}
+.wk-segs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px;margin:0}
+.wk-seg{height:16px;display:grid;align-items:center;margin:0!important}
+.wk-seg i{height:6px;border-radius:3px;background:var(--hair2);box-shadow:none;transition:background .25s}
+.wk-seg.done i{background:color-mix(in srgb,var(--brand) 45%,var(--card));height:6px;box-shadow:none}
+.wk-seg.cur i{background:var(--brand);height:6px;box-shadow:none}
+.wk-seg.is-ci i{background:color-mix(in srgb,var(--point) 45%,var(--card))}
+.wk-seg.is-ci.cur i{background:var(--point)}
+.wk-row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:28px}
+.wk-count{margin:0!important;font-size:.9375rem;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.wk-lr{font-size:.75rem;font-weight:700;letter-spacing:.02em;color:var(--brand-ink);background:color-mix(in srgb,var(--brand) 12%,transparent);padding:4px 10px;border-radius:999px}
+.wk-first{display:none!important}
+.wk-pt{margin:4px 0 14px}
 </style>
 </head>
 <body>
@@ -5269,7 +5284,7 @@ const APP_URL = "https://mrguidolin.github.io/atlas-acupression/";
 // l'iPhone, compare les numéros de version et recharge si besoin. La
 // lecture « reload » remplace aussi la copie en cache : au prochain
 // lancement, l'app s'ouvre directement sur la nouvelle version.
-const APP_VERSION = "36.9";
+const APP_VERSION = "37.0";
 const verCmp = (a, b) => { const x = a.split(".").map(Number), y = b.split(".").map(Number); for (let i = 0; i < Math.max(x.length, y.length); i++){ const d = (x[i] || 0) - (y[i] || 0); if (d) return d; } return 0; };
 async function checkUpdate(btn){
  const st = $(".ver-st"), say = m => { if (st) st.textContent = m; };
@@ -5492,11 +5507,11 @@ const ciMark = p => S.preg && p.preg === "ci";
 const wkName = p => `${code(p)} ${p.py}`;
 function walkCtx(W){
  const N = W.ids.length;
+ const first = W.ids.map(x => W.steps.findIndex(s => s.id === x));
  return `<div class="wk-ctx">
-  <div class="wk-row"><span class="wk-count">Point ${W.pi + 1}/${N}</span>${W.lr ? `<span class="wk-lr">${W.lr === "L" ? "Gauche" : "Droite"}</span>` : ""}<span class="wk-sp"></span>${W.i > 0 ? `<button class="wk-first" data-wgo="0" aria-label="Revenir au premier point : ${wkName(BY[W.ids[0]])}"><span class="msi" aria-hidden="true">first_page</span>Début</button>` : ""}</div>
-  <div class="wk-segs" role="group" aria-label="Étapes du protocole">${W.steps.map((s, j) => { const q = BY[s.id];
-   return `<button class="wk-seg${s.lr === "R" ? " wk-r" : ""}${j < W.i ? " done" : j === W.i ? " cur" : ""}${ciMark(q) ? " is-ci" : ""}" data-wgo="${j}" aria-label="${wkName(q)}${s.lr ? ", " + sideWord(s.lr) : ""}${ciMark(q) ? ", à éviter pendant la grossesse" : ""}"${j === W.i ? ' aria-current="step"' : ""}><i></i></button>`; }).join("")}</div>
-
+  <div class="wk-segs" role="group" aria-label="Points du protocole">${W.ids.map((x, k) => { const q = BY[x];
+   return `<button class="wk-seg${k < W.pi ? " done" : k === W.pi ? " cur" : ""}${ciMark(q) ? " is-ci" : ""}" data-wgo="${first[k]}" aria-label="Point ${k + 1} : ${wkName(q)}${ciMark(q) ? ", à éviter pendant la grossesse" : ""}"${k === W.pi ? ' aria-current="step"' : ""}><i></i></button>`; }).join("")}</div>
+  <div class="wk-row"><span class="wk-count">Point ${W.pi + 1}/${N}</span>${W.lr ? `<span class="wk-lr">${W.lr === "L" ? "Gauche" : "Droite"}</span>` : ""}</div>
  </div>`;
 }
 function walkEnd(W){
