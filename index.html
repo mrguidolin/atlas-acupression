@@ -4178,6 +4178,8 @@ function sessOpts(){
  return o;
 }
 function saveOpts(){ S.sess = {...SU.opts}; save(); }
+// v37.2 : plus de mention « un seul point » à l'écran ; sideOf reste un indicateur interne
+const sideLbl = p => p.id === "SISHENCONG" ? sideOf(p) : "";
 function sideOf(p){
  if (p.id === "SISHENCONG") return "Les quatre points, l'un après l'autre";
  if (!bilateral(p)) return p.m === "GV" || p.m === "CV" ? "Un seul point, sur la ligne du milieu" : "Un seul endroit";
@@ -4229,7 +4231,7 @@ function buildSteps(){
   if (!one && SU.opts.sides === "seq"){
    steps.push({id:r.id, dur:r.dur, side:"Côté gauche", lr:"L"});
    steps.push({id:r.id, dur:r.dur, side:"Côté droit", lr:"R", swap:true});
-  } else steps.push({id:r.id, dur:r.dur, side: one || "Les deux côtés en même temps"});
+  } else steps.push({id:r.id, dur:r.dur, side: one ? sideLbl(p) : "Les deux côtés en même temps"});
  }
  return steps;
 }
@@ -4241,10 +4243,10 @@ function setupHTML(){
  const steps = buildSteps(), total = totalOf(steps), n = SU.list.filter(r => r.on).length;
  const rows = SU.list.map((r, i) => {
   const p = BY[r.id], one = sideOf(p), ci = S.preg && p.preg === "ci";
-  const side = one ? one : o.sides === "seq" ? "Gauche, puis droite" : "Les deux côtés ensemble";
+  const side = one ? sideLbl(p) : o.sides === "seq" ? "Gauche, puis droite" : "Les deux côtés ensemble";
   return `<li class="pt-row${r.on ? "" : " off"}">
    <button class="ck" data-s="tog" data-i="${i}" role="checkbox" aria-checked="${r.on}" aria-label="Inclure ${code(p)} ${p.py}">${msi(r.on ? "check_circle" : "radio_button_unchecked", r.on)}</button>
-   <span class="pt-t"><span class="pt-l"><span class="pt-n">${i + 1}</span><span class="code" style="${elVar(p.m)}">${code(p)}</span><b>${p.py}</b></span><span class="pt-fs">${p.fs}</span><span class="pt-side${ci ? " is-ci" : ""}">${ci ? "À éviter pendant la grossesse" : side}</span></span>
+   <span class="pt-t"><span class="pt-l"><span class="pt-n">${i + 1}</span><span class="code" style="${elVar(p.m)}">${code(p)}</span><b>${p.py}</b></span><span class="pt-fs">${p.fs}</span>${ci || side ? `<span class="pt-side${ci ? " is-ci" : ""}">${ci ? "À éviter pendant la grossesse" : side}</span>` : ""}</span>
   </li>`;
  }).join("");
  const ambs = [AMBIENCES.find(a => a[0] === "none"), ...AMBIENCES.filter(a => a[0] !== "none")];
@@ -4363,7 +4365,7 @@ function sideIcon(st){
  const half = (x, c) => `<path d="M${x ? 12 : 12} 7.6c${x ? "3.2 0 4.6 1.2 4.9 3.6l.9 7.4h-2.2l-.5 9.4h-3.1z" : "-3.2 0-4.6 1.2-4.9 3.6l-.9 7.4h2.2l.5 9.4h3.1z"}" fill="${c}"/>`;
  return `<svg class="sg-body" viewBox="0 0 24 30" aria-hidden="true"><circle cx="12" cy="3.6" r="3" fill="${off}"/>${half(0, L || both ? on : off)}${half(1, R || both ? on : off)}${mid ? `<rect x="11.2" y="8" width="1.6" height="19" rx=".8" fill="${on}"/>` : ""}</svg>`;
 }
-const sideTxt = st => st.lr === "L" ? "Côté gauche" : st.lr === "R" ? "Côté droit" : sideOf(BY[st.id]) ? sideOf(BY[st.id]) : "Les deux côtés";
+const sideTxt = st => st.lr === "L" ? "Côté gauche" : st.lr === "R" ? "Côté droit" : sideOf(BY[st.id]) ? sideLbl(BY[st.id]) : "Les deux côtés";
 function renderPlayer(){
  const wrap = SS.el.querySelector(".sess-wrap"); if (!wrap) return;
  const mute = `<button class="mbar-ic" data-s="mute" aria-label="${SND.muted ? "Remettre le son" : "Couper le son"}" aria-pressed="${SND.muted}">${msi(SND.muted ? "volume_off" : "volume_up")}</button>`;
@@ -4407,7 +4409,7 @@ function updateStatus(animate){
     <button class="sg-ic sg-play" data-s="toggle" aria-label="${SS.paused ? "Reprendre" : "Pause"}">${msi(SS.paused ? "play_arrow" : "pause", true)}</button>
     <button class="sg-ic" data-s="next" aria-label="Point suivant">${msi("skip_next", true)}</button>
    </div></div>
-  <div class="sg-st-bot"><p class="sg-side">${sideIcon(st)}<span>${sideTxt(st)}</span></p>${act}</div>
+  <div class="sg-st-bot">${sideTxt(st) ? `<p class="sg-side">${sideIcon(st)}<span>${sideTxt(st)}</span></p>` : ""}${act}</div>
  </div>`;
  const stg = SS.el.querySelector(".sg-stage"); stg && stg.classList.toggle("is-press", !find && !SS.paused);
  updateRing();
@@ -5141,7 +5143,7 @@ function screenPratiquer(){
  ${facts([
   ["De haut en bas", "La tête et la nuque d'abord, puis le tronc, puis les bras (de l'épaule vers la main), et les jambes en dernier (de la hanche vers le pied)."],
   ["Le dos avant le ventre", "Quand la séance a des points des deux côtés du tronc."],
-  ["Les deux côtés", "Presque tous les points existent à gauche et à droite : pressez toujours les deux, le même temps de chaque côté. Seuls les points de la ligne du milieu (VG et VC) sont uniques. Les fiches de soins d'hôpitaux font de même, par exemple celles du Memorial Sloan Kettering Cancer Center et des hôpitaux des anciens combattants américains."],
+  ["Les deux côtés", "Presque tous les points existent à gauche et à droite : pressez toujours les deux, le même temps de chaque côté. Les fiches de soins d'hôpitaux font de même, par exemple celles du Memorial Sloan Kettering Cancer Center et des hôpitaux des anciens combattants américains."],
   ["Gauche, puis droite", "Pour chaque point, le côté gauche puis le côté droit, avant de passer au suivant. C'est un choix pratique de l'atlas, et le réglage par défaut de la séance guidée (« L'un après l'autre »). Vous pouvez aussi presser les deux côtés en même temps, avec les deux mains (« En même temps »)."],
   ["Douleur aiguë", "Pour un torticolis ou un lumbago, on presse souvent d'abord des points éloignés de la douleur, en bougeant doucement la zone bloquée, puis les points proches. L'atlas suit aussi cet ordre pour le mal de dents, la douleur d'estomac et les règles douloureuses. Les points éloignés restent pris de haut en bas."],
   ["« Se recentrer »", "Cette séance fait l'inverse : elle part des pieds, passe par le poignet puis le ventre, et finit à la tête."]
@@ -5294,7 +5296,7 @@ const APP_URL = "https://mrguidolin.github.io/atlas-acupression/";
 // l'iPhone, compare les numéros de version et recharge si besoin. La
 // lecture « reload » remplace aussi la copie en cache : au prochain
 // lancement, l'app s'ouvre directement sur la nouvelle version.
-const APP_VERSION = "37.1";
+const APP_VERSION = "37.2";
 const verCmp = (a, b) => { const x = a.split(".").map(Number), y = b.split(".").map(Number); for (let i = 0; i < Math.max(x.length, y.length); i++){ const d = (x[i] || 0) - (y[i] || 0); if (d) return d; } return 0; };
 async function checkUpdate(btn){
  const st = $(".ver-st"), say = m => { if (st) st.textContent = m; };
@@ -5453,9 +5455,9 @@ const lcFirst = t => t ? t.charAt(0).toLowerCase() + t.slice(1) : t;
 function sideBox(p){
  if (p.id === "SISHENCONG") return `<div class="sidebox"><span class="msi" aria-hidden="true">adjust</span><p><b>Quatre points.</b> Ils entourent VG 20, au sommet du crâne. Pressez-les l'un après l'autre.</p></div>`;
  if (bilateral(p)) return `<div class="sidebox"><span class="msi" aria-hidden="true">compare_arrows</span><p><b>À faire des deux côtés.</b> Ce point existe à gauche et à droite du corps. Pressez-le d'abord à gauche, puis à droite, le même temps de chaque côté.</p></div>`;
- return `<div class="sidebox"><span class="msi" aria-hidden="true">adjust</span><p><b>Un seul point.</b> Il est sur la ligne du milieu du corps : pressez-le une seule fois.</p></div>`;
+ return "";
 }
-const sidesTxt = p => p.id === "SISHENCONG" ? "Quatre points autour de VG 20" : bilateral(p) ? "Des deux côtés du corps" : p.m === "GV" || p.m === "CV" ? "Un seul point, sur la ligne du milieu" : "Un seul endroit";
+const sidesTxt = p => p.id === "SISHENCONG" ? "Quatre points autour de VG 20" : bilateral(p) ? "Des deux côtés du corps" : "";
 function pointHTML(p, W){
  const m = MER[p.m];
  const fw = Math.min(640, innerWidth) - 32;
@@ -5585,7 +5587,7 @@ function openBody(id){
  push(`<div class="body-x-wrap"><button class="body-x" data-act="back" aria-label="Fermer et revenir au point ${code(p)}">${msi("close")}</button></div>${bar(code(p) + " · sur le corps")}
  <article class="detail">
   <h1 class="h1d">Où se trouve ${code(p)}</h1>
-  <p class="sub">${p.py} · ${(t_ => t_.charAt(0).toLowerCase() + t_.slice(1))(sidesTxt(p))}</p>
+  <p class="sub">${p.py}${sidesTxt(p) ? " · " + (t_ => t_.charAt(0).toLowerCase() + t_.slice(1))(sidesTxt(p)) : ""}</p>
   <figure class="card figcard pfig">${F.html}<figcaption class="pl-cap"><b>${F.cap}</b>${merCap(F.mer)}</figcaption></figure>
   <div class="howto"><h2>Pour le trouver</h2>${repSteps(p.rep)}${soloHTML(p)}</div>
  </article>`);
@@ -5726,7 +5728,7 @@ function openSymptom(ref){
   return `<button class="pcard${preg ? " is-ci" : ""}" data-id="${p.id}" data-walk="${ck}/${sk}"><span class="pc-n">${idx+1}</span>${F.html}
    <span class="pc-t"><span class="code" style="${elVar(p.m)}">${code(p)}</span><b>${p.py}</b></span>
    <small class="pc-o">${bilateral(p) ? F.cap.replace(/ (gauche|droite?)(?= ·|$)/, "") : F.cap}</small>
-   <small>${preg ? "À éviter pendant la grossesse" : (p.id === "SISHENCONG" ? "Quatre points" : bilateral(p) ? "À faire des deux côtés" : "Un seul point, au milieu")}</small></button>`;
+   ${preg || p.id === "SISHENCONG" || bilateral(p) ? `<small>${preg ? "À éviter pendant la grossesse" : p.id === "SISHENCONG" ? "Quatre points" : "À faire des deux côtés"}</small>` : ""}</button>`;
  }).join("");
  const ci = pts.filter(p => p.preg === "ci");
  const pregNote = S.preg && ci.length ? `<div class="alert" role="alert">${svgi("warn",18,2)}<span>Grossesse : n'utilisez pas ${ci.map(code).join(", ")}.</span></div>` : "";
